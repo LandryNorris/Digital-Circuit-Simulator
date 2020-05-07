@@ -50,7 +50,6 @@ public class Main implements ComponentListener {
 	BufferStrategy buffer2;
 	Graphics2D g;
 	Graphics2D g2;
-	Painter painter;
 
 	SaveManager saveManager;
 	Simulator simulator;
@@ -119,16 +118,11 @@ public class Main implements ComponentListener {
 		frame = new JFrame(title);
 		System.out.println(toolbarHeight);
 		canvas = new Canvas();
-		painter = new Painter();
 		toolbarCanvas = new Canvas();
 		canvas.setMaximumSize(new Dimension(10000, 10000));
 		canvas.setMinimumSize(new Dimension(width, height-toolbarHeight));
 		canvas.setPreferredSize(new Dimension(width, height-toolbarHeight));
 
-		painter.setMaximumSize(new Dimension(10000, 10000));
-		painter.setMinimumSize(new Dimension(width, height-toolbarHeight));
-		painter.setPreferredSize(new Dimension(width, height-toolbarHeight));
-		
 		toolbarCanvas.setMaximumSize(new Dimension(10000, toolbarHeight));
 		toolbarCanvas.setMinimumSize(new Dimension(0, toolbarHeight));
 		toolbarCanvas.setPreferredSize(new Dimension(width, toolbarHeight));
@@ -139,7 +133,7 @@ public class Main implements ComponentListener {
 	    panel.setLayout(new BorderLayout());
 		panel.add(toolbarCanvas, BorderLayout.NORTH);
 		//panel.add(canvas, BorderLayout.SOUTH);
-		panel.add(painter, BorderLayout.CENTER);
+		panel.add(canvas, BorderLayout.CENTER);
 		
 		toolbar.width = width;
 		toolbar.height = toolbarHeight;
@@ -172,7 +166,7 @@ public class Main implements ComponentListener {
 	void attachSimulatorListeners() {
 		frame.addKeyListener(simulator);
 		frame.addComponentListener(this);
-		painter.addComponentListener(this);
+		canvas.addComponentListener(this);
 		canvas.addMouseListener(simulator);
 		canvas.addMouseMotionListener(simulator);
 		canvas.addKeyListener(simulator);
@@ -181,7 +175,7 @@ public class Main implements ComponentListener {
 		System.out.println("listeners attached");
 	}
 	
-	void draw2() {
+	void draw() {
 		buffer = canvas.getBufferStrategy();
 		buffer2 = toolbarCanvas.getBufferStrategy();
 		if (buffer == null) {
@@ -201,21 +195,7 @@ public class Main implements ComponentListener {
 		buffer2.show();
 		g2.dispose();
 	}
-	
-	void draw() {
-		painter.repaint();
-		buffer2 = toolbarCanvas.getBufferStrategy();
-		if (buffer2 == null) {
-			toolbarCanvas.createBufferStrategy(3);
-			return;
-		}
-		g2 = (Graphics2D) buffer2.getDrawGraphics();
-		toolbar.draw(g2);
-		buffer2.show();
-		g2.dispose();
-		frame.pack();
-	}
-	
+
 	void createNewSimulator() {
 		simulator = new Simulator();
 		simulator.width = canvas.getWidth();
@@ -327,18 +307,6 @@ public class Main implements ComponentListener {
 	public void componentHidden(ComponentEvent e) {
 		// TODO Auto-generated method stub
 		
-	}
-	
-
-	class Painter extends JComponent {
-
-		private static final long serialVersionUID = 3367328317310385936L;
-	
-		@Override
-		public void paint(Graphics g) {
-			Graphics2D g2d = (Graphics2D) g;
-			simulator.draw(g2d);
-		}
 	}
 }
 
