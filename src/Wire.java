@@ -91,7 +91,7 @@ public class Wire {
 	}
 	
 	void update(ArrayList<Component> components, ArrayList<Wire> wires) {
-		state = (input != null) ? ((input.isWire) ? Wire.getState(wires, input) : Component.getState(components, input)) : -1;
+		state = (input != null) ? Component.getState(components, input) : -1;
 		if(outputs == null) return;
 		for(Pin output: outputs) {
 			Component.setState(components, output, state);

@@ -16,37 +16,46 @@
 import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferStrategy;
 import java.io.IOException;
 
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-public class Main{
+public class Main implements ComponentListener {
 
 	int width = 1000;
 	int height = 500;
+	int toolbarHeight = height/25;
 
 	String title = "Simulator";
 	Toolbar toolbar;
 	
 	JFrame frame;
 	Canvas canvas;
+	JPanel panel;
 	Canvas toolbarCanvas;
 	BufferStrategy buffer;
 	BufferStrategy buffer2;
 	Graphics2D g;
 	Graphics2D g2;
+	Painter painter;
 
 	SaveManager saveManager;
 	Simulator simulator;
+	
+	Dimension lastSize;
 	
 	public static void main(String[] args) {
 		try {
@@ -108,32 +117,37 @@ public class Main{
 	
 	void createFrame() {
 		frame = new JFrame(title);
-		int toolbarHeight = height/25;
 		System.out.println(toolbarHeight);
 		canvas = new Canvas();
+		painter = new Painter();
 		toolbarCanvas = new Canvas();
-		canvas.setMaximumSize(new Dimension(width, height-toolbarHeight));
+		canvas.setMaximumSize(new Dimension(10000, 10000));
 		canvas.setMinimumSize(new Dimension(width, height-toolbarHeight));
 		canvas.setPreferredSize(new Dimension(width, height-toolbarHeight));
+
+		painter.setMaximumSize(new Dimension(10000, 10000));
+		painter.setMinimumSize(new Dimension(width, height-toolbarHeight));
+		painter.setPreferredSize(new Dimension(width, height-toolbarHeight));
 		
-		toolbarCanvas.setMaximumSize(new Dimension(width, toolbarHeight));
-		toolbarCanvas.setMinimumSize(new Dimension(width, toolbarHeight));
+		toolbarCanvas.setMaximumSize(new Dimension(10000, toolbarHeight));
+		toolbarCanvas.setMinimumSize(new Dimension(0, toolbarHeight));
 		toolbarCanvas.setPreferredSize(new Dimension(width, toolbarHeight));
 		
-		JPanel panel = new JPanel();
+		panel = new JPanel();
 		toolbar = createToolbar(panel);
 
 	    panel.setLayout(new BorderLayout());
 		panel.add(toolbarCanvas, BorderLayout.NORTH);
-		panel.add(canvas, BorderLayout.SOUTH);
+		//panel.add(canvas, BorderLayout.SOUTH);
+		panel.add(painter, BorderLayout.CENTER);
 		
 		toolbar.width = width;
 		toolbar.height = toolbarHeight;
 		frame.add(panel);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(width, height);
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		//frame.addWindowStateListener(this);
 		frame.addWindowListener(new WindowAdapter() {
 			@Override
 		    public void windowClosing(WindowEvent e) {
@@ -157,6 +171,8 @@ public class Main{
 	
 	void attachSimulatorListeners() {
 		frame.addKeyListener(simulator);
+		frame.addComponentListener(this);
+		painter.addComponentListener(this);
 		canvas.addMouseListener(simulator);
 		canvas.addMouseMotionListener(simulator);
 		canvas.addKeyListener(simulator);
@@ -165,7 +181,7 @@ public class Main{
 		System.out.println("listeners attached");
 	}
 	
-	void draw() {
+	void draw2() {
 		buffer = canvas.getBufferStrategy();
 		buffer2 = toolbarCanvas.getBufferStrategy();
 		if (buffer == null) {
@@ -184,6 +200,20 @@ public class Main{
 		g.dispose();
 		buffer2.show();
 		g2.dispose();
+	}
+	
+	void draw() {
+		painter.repaint();
+		buffer2 = toolbarCanvas.getBufferStrategy();
+		if (buffer2 == null) {
+			toolbarCanvas.createBufferStrategy(3);
+			return;
+		}
+		g2 = (Graphics2D) buffer2.getDrawGraphics();
+		toolbar.draw(g2);
+		buffer2.show();
+		g2.dispose();
+		frame.pack();
 	}
 	
 	void createNewSimulator() {
@@ -255,8 +285,7 @@ public class Main{
 		
 		t.printListener = new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-			    System.out.println("Popup menu item ["
-			            + event.getActionCommand() + "] was pressed.");
+			    simulator.print();
 			}
 		};
 		
@@ -268,4 +297,48 @@ public class Main{
 		};
 		return t;
 	}
+	
+	@Override
+	public void componentResized(ComponentEvent e) {
+		java.awt.Component c = (java.awt.Component) e.getSource();
+		Dimension size = c.getSize();
+		int width = size.width;
+		int height = size.height;
+		
+		panel.setPreferredSize(new Dimension(frame.getContentPane().getWidth(), frame.getContentPane().getHeight()));
+		
+		simulator.width = width;
+		simulator.height = height;
+	}
+
+	@Override
+	public void componentMoved(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void componentShown(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void componentHidden(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+
+	class Painter extends JComponent {
+
+		private static final long serialVersionUID = 3367328317310385936L;
+	
+		@Override
+		public void paint(Graphics g) {
+			Graphics2D g2d = (Graphics2D) g;
+			simulator.draw(g2d);
+		}
+	}
 }
+

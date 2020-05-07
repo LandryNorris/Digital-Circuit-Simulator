@@ -13,7 +13,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
-public class Toolbar implements MouseListener, KeyListener {
+public class Toolbar implements MouseListener {
 
 	int width, height;
 	int itemWidth;
@@ -24,7 +24,6 @@ public class Toolbar implements MouseListener, KeyListener {
 
 	JPopupMenu popup = new JPopupMenu();
 	
-
 	ActionListener newListener;
 	ActionListener openFileListener;
 	ActionListener openLastListener;
@@ -62,24 +61,6 @@ public class Toolbar implements MouseListener, KeyListener {
 	void openPopupMenu(int index) {
 		popup = createMenu(index);
 		popup.show(frame, index * itemWidth, height);
-	}
-
-	@Override
-	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void keyPressed(KeyEvent e) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override

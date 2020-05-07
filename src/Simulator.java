@@ -14,6 +14,7 @@
  */
 
 import java.awt.BasicStroke;
+import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
@@ -22,8 +23,13 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
 
 public class Simulator implements MouseListener, MouseMotionListener, KeyListener {
 
@@ -75,7 +81,7 @@ public class Simulator implements MouseListener, MouseMotionListener, KeyListene
 	}
 
 	Pin pinClicked(int x, int y) {
-//		// inputs are absolute coordinates
+		// inputs are absolute coordinates
 		for(int i = 0; i < components.size(); i++) {
 			Pin pin = components.get(i).pinClicked(x, y);
 			if(pin != null)
@@ -99,7 +105,7 @@ public class Simulator implements MouseListener, MouseMotionListener, KeyListene
 		}
 
 		for(Component component: components) {
-			if(component.onScreen(x, y, width, height))
+			if(true || component.onScreen(gridX, gridY, width/Simulator.gridSize, height/Simulator.gridSize))
 				component.draw(g, gridX, gridY);
 		}
 
@@ -141,6 +147,41 @@ public class Simulator implements MouseListener, MouseMotionListener, KeyListene
 				}
 			}
 		}
+		
+		for(int i = 0; i < wires.size(); i++) {
+			Wire wire = wires.get(i);
+			Pin input = findWireInput(wire, i);
+			if(input != null) {
+				System.out.println("Did this really work?");
+				System.out.println(input.componentNumber);
+				System.out.println(input.pinNumber);
+				System.out.println(input.isInput);
+				wire.input = input;
+			}
+		}
+	}
+	
+	Pin findWireInput(Wire wire, int wireIndex) {
+		System.out.println("finding wire recursively.");
+		if(wire.input != null) {
+			System.out.println("Wire has input");
+			return wire.input;
+		}
+		for(int i = 0; i < wire.points.length; i++) {
+			Coordinate p = wire.points[i];
+			for(int j = 0; j < wires.size(); j++) {
+				if(j == wireIndex) continue;
+				Wire other = wires.get(j);
+				Coordinate overlapPoint = other.pointAt(p.x, p.y);
+				if(overlapPoint != null) {
+					System.out.println("found wire connection");
+					System.out.println(other.input != null);
+					Pin otherInput = findWireInput(other, j);
+				}
+			}
+		}
+		System.out.println("no connections found.");
+		return null;
 	}
 
 	int snapToGridX(int coordinate) {
@@ -162,7 +203,6 @@ public class Simulator implements MouseListener, MouseMotionListener, KeyListene
 	void onMousePressed(MouseEvent e) {
 
 		if(e.getButton() == MouseEvent.BUTTON1) {
-			System.out.println("left click!");
 			if(selectedComponentIndex != -1) {
 				selectedComponentIndex = -1;
 				System.out.println("deselecting component");
@@ -177,7 +217,6 @@ public class Simulator implements MouseListener, MouseMotionListener, KeyListene
 					drawWireIndex = wires.size() - 1;
 				} else {
 					for(int i = 0; i < components.size(); i++) {
-						System.out.println("checking components at " + e.getX() + ", " + e.getY());
 						if(components.get(i).clicked(e.getX(), e.getY(), gridX, gridY)) {
 							selectedComponentIndex = i;
 							System.out.println("dragging component");
@@ -209,6 +248,31 @@ public class Simulator implements MouseListener, MouseMotionListener, KeyListene
 					((Input) component).toggle();
 				}
 			}
+		}
+	}
+	
+	void print() {
+		height = (int) (height*1.5);
+		//Canvas canvas = new Canvas();
+	    BufferedImage bImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+		//canvas.setSize(width, height);
+//		BufferStrategy buffer = canvas.getBufferStrategy();
+//		if (buffer == null) {
+//			canvas.createBufferStrategy(3);
+//			return;
+//		}
+		//Graphics2D g = (Graphics2D) buffer.getDrawGraphics();
+		Graphics2D g = (Graphics2D) bImg.createGraphics();
+		draw(g);
+		//buffer.show();
+		g.dispose();
+		try {
+			ImageIO.write(bImg, "png", new File("Image.png"));
+			System.out.println("created png");
+		} catch(IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -289,6 +353,16 @@ public class Simulator implements MouseListener, MouseMotionListener, KeyListene
 			components.add(new XnorGate(selectedComponentIndex));
 		}
 		
+		else if(selectedComponentIndex == -1 && e.getKeyChar() == 'd') {
+			selectedComponentIndex = components.size();
+			components.add(new DFlipFlop(selectedComponentIndex));
+		}
+		
+		else if(selectedComponentIndex == -1 && e.getKeyChar() == 't') {
+			selectedComponentIndex = components.size();
+			components.add(new TFlipFlop(selectedComponentIndex));
+		}
+		
 		else if(e.getKeyChar() == 'u') {
 			attachWires();
 		}
@@ -314,6 +388,12 @@ public class Simulator implements MouseListener, MouseMotionListener, KeyListene
 				System.out.println("failed to save");
 				e1.printStackTrace();
 			}
+		}
+		
+		if(selectedComponentIndex != -1 && e.getKeyCode() == KeyEvent.VK_DELETE) {
+			System.out.println("deleting component");
+			components.remove(selectedComponentIndex);
+			selectedComponentIndex = -1;
 		}
 	}
 
@@ -394,5 +474,4 @@ public class Simulator implements MouseListener, MouseMotionListener, KeyListene
 		// TODO Auto-generated method stub
 
 	}
-
 }
