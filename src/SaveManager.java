@@ -143,6 +143,7 @@ public class SaveManager {
 	}
 
 	Simulator loadSimulator() throws IOException {
+		if(file == null) return null;
 		FileInputStream fileInputStream = null;
 	    byte[] bytes = new byte[(int) file.length()];
 	    //convert file into array of bytes
@@ -206,7 +207,7 @@ public class SaveManager {
 		int y = in.readInt();
 		c.x = x;
 		c.y = y;
-		c.setPinLocations(0, 0);
+		c.setPinLocations();
 		return c;
 	}
 

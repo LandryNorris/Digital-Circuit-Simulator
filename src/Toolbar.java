@@ -1,20 +1,19 @@
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
 
+import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
-public class Toolbar implements MouseListener {
+public class Toolbar extends JComponent implements MouseListener {
 
+	private static final long serialVersionUID = -3012892157986073114L;
 	int width, height;
 	int itemWidth;
 
@@ -38,15 +37,16 @@ public class Toolbar implements MouseListener {
 		frame = f;
 	}
 
-	void draw(Graphics2D g) {
+	@Override
+	protected void paintComponent(Graphics graphics) {
+		Graphics2D g = (Graphics2D) graphics;
 		g.setColor(Color.WHITE);
-		g.fillRect(0, 0, width, height);
+		g.fillRect(0, 0, getWidth(), getHeight());
 		g.setColor(Color.BLACK);
 		g.setFont(g.getFont().deriveFont(18f));
-		itemWidth = width / 12;
+		itemWidth = getWidth() / 12;
 		for(int i = 0; i < options.length; i++) {
-			g.drawString(options[i], itemWidth * i,
-					height / 2 + g.getFontMetrics().getHeight() / 2 - g.getFontMetrics().getDescent());
+			g.drawString(options[i], itemWidth * i, getHeight() / 2 + g.getFontMetrics().getHeight() / 2 - g.getFontMetrics().getDescent());
 		}
 	}
 
@@ -60,7 +60,7 @@ public class Toolbar implements MouseListener {
 
 	void openPopupMenu(int index) {
 		popup = createMenu(index);
-		popup.show(frame, index * itemWidth, height);
+		popup.show(frame, index * itemWidth, getHeight());
 	}
 
 	@Override
@@ -94,11 +94,13 @@ public class Toolbar implements MouseListener {
 	}
 
 	JPopupMenu createMenu(int option) {
-		//"New", "Open File", "Open Last", "Sbmnu:Recents,test1,test2,test3,", "Close", "Save", "Save As",
-		//"Print", "Settings"
+		
 		JPopupMenu popup = new JPopupMenu();
 		switch(option) {
+		
 			case 0: { //File
+				//"New", "Open File", "Open Last", "Sbmnu:Recents,test1,test2,test3,", "Close", "Save", "Save As",
+				//"Print", "Settings"
 				JMenuItem n = new JMenuItem("New");
 				JMenuItem openFile = new JMenuItem("Open File");
 				JMenuItem openLast = new JMenuItem("Open Last");

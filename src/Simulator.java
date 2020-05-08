@@ -14,8 +14,8 @@
  */
 
 import java.awt.BasicStroke;
-import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.event.KeyEvent;
@@ -23,15 +23,15 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
+import javax.swing.JComponent;
 
-public class Simulator implements MouseListener, MouseMotionListener, KeyListener {
+public class Simulator extends JComponent implements MouseListener, MouseMotionListener, KeyListener {
 
 	String name = "";
 	int selectedComponentIndex = -1;
@@ -40,8 +40,8 @@ public class Simulator implements MouseListener, MouseMotionListener, KeyListene
 	int lastMouseX = -1;
 	int lastMouseY = -1;
 
-	int width;
-	int height;
+	//int getWidth();
+	//int getHeight();
 	int x; // x in the window
 	int y; // y in the window
 
@@ -50,7 +50,7 @@ public class Simulator implements MouseListener, MouseMotionListener, KeyListene
 
 	boolean requestFocus = true;
 
-	static int gridSize = 10;
+	int gridSize = 10;
 
 	static Stroke thinStroke = new BasicStroke(1F);
 	static Stroke thickStroke = new BasicStroke(2F);
@@ -80,7 +80,7 @@ public class Simulator implements MouseListener, MouseMotionListener, KeyListene
 		return null;
 	}
 
-	Pin pinClicked(int x, int y) {
+	Pin pinClicked(double x, double y) {
 		// inputs are absolute coordinates
 		for(int i = 0; i < components.size(); i++) {
 			Pin pin = components.get(i).pinClicked(x, y);
@@ -90,29 +90,31 @@ public class Simulator implements MouseListener, MouseMotionListener, KeyListene
 		return null;
 	}
 
-	void draw(Graphics2D g) {
+	@Override
+	public void paintComponent(Graphics graphics) {
+		Graphics2D g = (Graphics2D) graphics;
 		g.setColor(Color.WHITE);
-		g.fillRect(0, 0, width, height);
+		g.fillRect(0, 0, getWidth(), getHeight());
 		g.setColor(Color.LIGHT_GRAY);
 		g.setStroke(thinStroke);
-		int xOffset = gridX % Simulator.gridSize;
-		int yOffset = gridY % Simulator.gridSize;
-		for(int x = xOffset; x < width; x += gridSize) {
-			g.drawLine(x, 0, x, height);
+		int xOffset = gridX % gridSize;
+		int yOffset = gridY % gridSize;
+		for(int x = xOffset; x < getWidth(); x += gridSize) {
+			g.drawLine(x, 0, x, getHeight());
 		}
-		for(int y = yOffset; y < height; y += gridSize) {
-			g.drawLine(0, y, width, y);
+		for(int y = yOffset; y < getHeight(); y += gridSize) {
+			g.drawLine(0, y, getWidth(), y);
 		}
 
 		for(Component component: components) {
-			if(true || component.onScreen(gridX, gridY, width/Simulator.gridSize, height/Simulator.gridSize))
-				component.draw(g, gridX, gridY);
+			if(true || component.onScreen(gridX, gridY, getWidth()/gridSize, getHeight()/gridSize)) //placeholder for future functionality
+				component.draw(g, gridX, gridY, gridSize);
 		}
 
 		for(Wire wire: wires) {
-			wire.draw(g, gridX, gridY);
+			wire.draw(g, gridX, gridY, gridSize);
 		}
-		Coordinate c = Util.gridToAbsolute(new Coordinate(0, 0), gridX, gridY);
+		Coordinate c = Util.gridToAbsolute(new Coordinate(0, 0), gridX, gridY, gridSize);
 		g.drawOval(c.x, c.y, 5, 5);
 	}
 
@@ -185,23 +187,24 @@ public class Simulator implements MouseListener, MouseMotionListener, KeyListene
 	}
 
 	int snapToGridX(int coordinate) {
-		int offset = Util.modPos(gridX, Simulator.gridSize);
-		int gridOffset = (gridX - offset) / Simulator.gridSize;
+		int offset = Util.modPos(gridX, gridSize);
+		int gridOffset = (gridX - offset) / gridSize;
 
 		// returns value in grid coordinates
-		return ((int) (coordinate - offset) / Simulator.gridSize - gridOffset);
+		return ((int) (coordinate - offset) / gridSize - gridOffset);
 	}
 
 	int snapToGridY(int coordinate) {
-		int offset = Util.modPos(gridY, Simulator.gridSize);
-		int gridOffset = (gridY - offset) / Simulator.gridSize;
+		int offset = Util.modPos(gridY, gridSize);
+		int gridOffset = (gridY - offset) / gridSize;
 
 		// returns value in grid coordinates
-		return ((int) (coordinate - offset) / Simulator.gridSize - gridOffset);
+		return ((int) (coordinate - offset) / gridSize - gridOffset);
 	}
 
 	void onMousePressed(MouseEvent e) {
-
+		double mouseX = Util.map(e.getX(), gridX, gridX + gridSize, 0, 1); //in grid space
+		double mouseY = Util.map(e.getY(), gridY, gridY + gridSize, 0, 1); //in grid space
 		if(e.getButton() == MouseEvent.BUTTON1) {
 			if(selectedComponentIndex != -1) {
 				selectedComponentIndex = -1;
@@ -210,14 +213,14 @@ public class Simulator implements MouseListener, MouseMotionListener, KeyListene
 			}
 
 			if(drawWireIndex == -1) {
-				Pin pin = pinClicked(e.getX(), e.getY());
+				Pin pin = pinClicked(mouseX, mouseY);
 				if(pin != null) {
 					wires.add(Wire.start(pin));
 					System.out.println("starting wire");
 					drawWireIndex = wires.size() - 1;
 				} else {
 					for(int i = 0; i < components.size(); i++) {
-						if(components.get(i).clicked(e.getX(), e.getY(), gridX, gridY)) {
+						if(components.get(i).clicked(mouseX, mouseY)) {
 							selectedComponentIndex = i;
 							System.out.println("dragging component");
 						}
@@ -241,10 +244,10 @@ public class Simulator implements MouseListener, MouseMotionListener, KeyListene
 			}
 		}
 
+		//right-click
 		else if(e.getButton() == MouseEvent.BUTTON3) {
-			System.out.println("Button 3 pressed");
 			for(Component component: components) {
-				if(component instanceof Input && component.clicked(e.getX(), e.getY(), gridX, gridY)) {
+				if(component instanceof Input && component.clicked(mouseX, mouseY)) {
 					((Input) component).toggle();
 				}
 			}
@@ -252,20 +255,10 @@ public class Simulator implements MouseListener, MouseMotionListener, KeyListene
 	}
 	
 	void print() {
-		height = (int) (height*1.5);
 		//Canvas canvas = new Canvas();
-	    BufferedImage bImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-
-		//canvas.setSize(width, height);
-//		BufferStrategy buffer = canvas.getBufferStrategy();
-//		if (buffer == null) {
-//			canvas.createBufferStrategy(3);
-//			return;
-//		}
-		//Graphics2D g = (Graphics2D) buffer.getDrawGraphics();
-		Graphics2D g = (Graphics2D) bImg.createGraphics();
-		draw(g);
-		//buffer.show();
+	    BufferedImage bImg = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+		Graphics g = (Graphics) bImg.createGraphics();
+		paintComponent(g);
 		g.dispose();
 		try {
 			ImageIO.write(bImg, "png", new File("Image.png"));
@@ -277,12 +270,14 @@ public class Simulator implements MouseListener, MouseMotionListener, KeyListene
 	}
 
 	void onMouseDragged(MouseEvent e) {
+		System.out.println(gridX + ", " + gridY);
 		if(selectedComponentIndex != -1) {
 			components.get(selectedComponentIndex).x = snapToGridX(e.getX());
 			components.get(selectedComponentIndex).y = snapToGridY(e.getY());
 		}
 
 		if(drawWireIndex != -1 && pinClicked(snapToGridX(e.getX()), snapToGridY(e.getY())) != null) {
+			System.out.println("Attaching wire.");
 			wires.get(drawWireIndex).setEndpoint((new Coordinate(snapToGridX(e.getX()), snapToGridY(e.getY()))));
 		}
 
@@ -314,6 +309,7 @@ public class Simulator implements MouseListener, MouseMotionListener, KeyListene
 		}
 
 		else if(selectedComponentIndex == -1 && e.getKeyChar() == 'A') {
+			System.out.println("test");
 			selectedComponentIndex = components.size();
 			components.add(new NandGate(selectedComponentIndex));
 		}

@@ -26,10 +26,7 @@ public class Pin {
 	
 	int x;
 	int y;
-	
-	int gridX;
-	int gridY;
-	int r = Simulator.gridSize/2;
+	double r = 0.5;
 	
 	byte getState() {
 		return state;
@@ -39,28 +36,21 @@ public class Pin {
 		state = s;
 	}
 	
-	void draw(Graphics g) {
-		int xOffset = Util.modPos(gridX, Simulator.gridSize);
-		int gridOffsetX = (gridX - xOffset) / Simulator.gridSize;
-
-		int yOffset = Util.modPos(gridY, Simulator.gridSize);
-		int gridOffsetY = (gridY - yOffset) / Simulator.gridSize;
+	void draw(Graphics g, int gridX, int gridY, int gridSize) {
+		int ovalX = (int) (Util.map(x, 0, 1, gridX, gridX + gridSize) - r*gridSize);
+		int ovalY = (int) (Util.map(y, 0, 1, gridY, gridY + gridSize) - r*gridSize);
 		g.setColor(Color.GREEN);
-		g.drawOval((x+gridOffsetX)*Simulator.gridSize-r + xOffset, (y+gridOffsetY)*Simulator.gridSize-r + yOffset, r*2, r*2);
+		g.drawOval(ovalX, ovalY, (int) (r*2*gridSize), (int) (r*2*gridSize));
 	}
 	
-	void setXY(int x, int y, int gridX, int gridY) {
-
-		this.gridX = gridX;
-		this.gridY = gridY;
-
+	void setXY(int x, int y) {
 		this.x = x;
 		this.y = y;
 	}
 	
-	boolean clicked(int mouseX, int mouseY) {
-		Coordinate c = Util.gridToAbsolute(new Coordinate(x, y), gridX, gridY);
-		double distance = Math.sqrt((mouseX-c.x)*(mouseX-c.x) + (mouseY-c.y)*(mouseY-c.y));
+	boolean clicked(double mouseX, double mouseY) {
+		//x and y are in grid space
+		double distance = Math.sqrt((mouseX-x)*(mouseX-x) + (mouseY-y)*(mouseY-y));
 		return distance < r;
 	}
 	

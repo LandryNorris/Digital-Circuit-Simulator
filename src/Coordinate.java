@@ -21,10 +21,6 @@ public class Coordinate {
 		this.y = y;
 	}
 	
-	Coordinate snapToGrid() {
-		return new Coordinate(Simulator.gridSize*((int) x/Simulator.gridSize), Simulator.gridSize*((int) y/Simulator.gridSize));
-	}
-	
 	void print() {
 		System.out.println(x + ", " + y);
 	}

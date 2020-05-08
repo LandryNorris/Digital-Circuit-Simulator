@@ -21,31 +21,35 @@ public class Util {
 		return result;
 	}
 	
-	static Coordinate gridToAbsolute(Coordinate c, int gridX, int gridY) {
-		int xOffset = Util.modPos(gridX, Simulator.gridSize);
-		int gridOffsetX = (gridX - xOffset) / Simulator.gridSize;
+	static double map(double input, double minIn, double maxIn, double minOut, double maxOut) {
+		return (input - minIn) / (maxIn - minIn) * (maxOut - minOut) + minOut;
+	}
+	
+	static Coordinate gridToAbsolute(Coordinate c, int gridX, int gridY, int gridSize) {
+		int xOffset = Util.modPos(gridX, gridSize);
+		int gridOffsetX = (gridX - xOffset) / gridSize;
 
-		int yOffset = Util.modPos(gridY, Simulator.gridSize);
-		int gridOffsetY = (gridY - yOffset) / Simulator.gridSize;
+		int yOffset = Util.modPos(gridY, gridSize);
+		int gridOffsetY = (gridY - yOffset) / gridSize;
 		
 		//in grid coordinates
 		Coordinate result = c.clone();
 		
-		result.x = (result.x + gridOffsetX)*Simulator.gridSize + xOffset;
-		result.y = (result.y + gridOffsetY)*Simulator.gridSize + yOffset;
+		result.x = (result.x + gridOffsetX)*gridSize + xOffset;
+		result.y = (result.y + gridOffsetY)*gridSize + yOffset;
 		return result;
 	}
 	
-	static Coordinate absoluteToGrid(Coordinate c, int gridX, int gridY) {
-		int xOffset = Util.modPos(gridX, Simulator.gridSize);
-		int gridOffsetX = (gridX - xOffset) / Simulator.gridSize;
+	static Coordinate absoluteToGrid(Coordinate c, int gridX, int gridY, int gridSize) {
+		int xOffset = Util.modPos(gridX, gridSize);
+		int gridOffsetX = (gridX - xOffset) / gridSize;
 
-		int yOffset = Util.modPos(gridY, Simulator.gridSize);
-		int gridOffsetY = (gridY - yOffset) / Simulator.gridSize;
+		int yOffset = Util.modPos(gridY, gridSize);
+		int gridOffsetY = (gridY - yOffset) / gridSize;
 		
 		Coordinate result = c.clone();
-		result.x = (result.x - xOffset)/Simulator.gridSize - gridOffsetX;
-		result.y = (result.y - yOffset)/Simulator.gridSize - gridOffsetY;
+		result.x = (result.x - xOffset)/gridSize - gridOffsetX;
+		result.y = (result.y - yOffset)/gridSize - gridOffsetY;
 		
 		return result;
 	}

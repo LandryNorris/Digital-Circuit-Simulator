@@ -72,20 +72,20 @@ public class Wire {
 		return (state == 1) ? new Color(0, 255, 51) : new Color(0, 200, 0);
 	}
 	
-	void draw(Graphics g, int gridX, int gridY) {
+	void draw(Graphics g, int gridX, int gridY, int gridSize) {
 		if(points == null || points.length == 0) return;
-		int xOffset = Util.modPos(gridX, Simulator.gridSize);
-		int gridOffsetX = (gridX - xOffset) / Simulator.gridSize;
+		int xOffset = Util.modPos(gridX, gridSize);
+		int gridOffsetX = (gridX - xOffset) / gridSize;
 
-		int yOffset = Util.modPos(gridY, Simulator.gridSize);
-		int gridOffsetY = (gridY - yOffset) / Simulator.gridSize;
+		int yOffset = Util.modPos(gridY, gridSize);
+		int gridOffsetY = (gridY - yOffset) / gridSize;
 		
 		g.setColor(getColor());
 		Coordinate last = points[0];
 		for(int i = 1; i < points.length; i++) {
-			g.drawLine((last.x+gridOffsetX)*Simulator.gridSize+xOffset, (last.y+gridOffsetY)*Simulator.gridSize+yOffset, (points[i].x+gridOffsetX)*Simulator.gridSize+xOffset, (points[i].y+gridOffsetY)*Simulator.gridSize+yOffset);
+			g.drawLine((last.x+gridOffsetX)*gridSize+xOffset, (last.y+gridOffsetY)*gridSize+yOffset, (points[i].x+gridOffsetX)*gridSize+xOffset, (points[i].y+gridOffsetY)*gridSize+yOffset);
 
-			//g.drawLine(last.x*Simulator.gridSize, last.y*Simulator.gridSize, points[i].x*Simulator.gridSize, points[i].y*Simulator.gridSize);
+			//g.drawLine(last.x*gridSize, last.y*gridSize, points[i].x*gridSize, points[i].y*gridSize);
 			last = points[i];
 		}
 	}

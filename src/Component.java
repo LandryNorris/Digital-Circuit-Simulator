@@ -54,7 +54,7 @@ public abstract class Component {
 		state = (byte) ((s) ? 1 : 0);
 	}
 
-	abstract void draw(Graphics2D g, int gridX, int gridY);
+	abstract void draw(Graphics2D g, int gridX, int gridY, int gridSize);
 
 	abstract void update();
 
@@ -104,7 +104,7 @@ public abstract class Component {
 		}
 	}
 	
-	abstract void setPinLocations(int gridX, int gridY);
+	abstract void setPinLocations();
 
 	void initOutputPins(int componentNumber, int r) {
 		for (int i = 0; i < outputs.length; i++) {
@@ -130,14 +130,8 @@ public abstract class Component {
 		return components.get(pin.componentNumber).outputs[pin.pinNumber].getState();
 	}
 
-	boolean clicked(int mouseX, int mouseY, int gridX, int gridY) {
-		int xOffset = Util.modPos(gridX, Simulator.gridSize);
-		int gridOffsetX = (gridX - xOffset) / Simulator.gridSize;
-
-		int yOffset = Util.modPos(gridY, Simulator.gridSize);
-		int gridOffsetY = (gridY - yOffset) / Simulator.gridSize;
-		
-		return (mouseX > (x+gridOffsetX)*Simulator.gridSize + xOffset && mouseX < (x + gridOffsetX + w)*Simulator.gridSize + xOffset) && (mouseY > (y+gridOffsetY)*Simulator.gridSize+yOffset && mouseY < (y + gridOffsetY + h)*Simulator.gridSize + yOffset);
+	boolean clicked(double mouseX, double mouseY) {
+		return (mouseX > x && mouseX < x+w && (mouseY > y && mouseY < y+h));
 	}
 	
 	Pin pinAt(int x, int y) {
@@ -161,7 +155,7 @@ public abstract class Component {
 		return null;
 	}
 
-	Pin pinClicked(int mouseX, int mouseY) {
+	Pin pinClicked(double mouseX, double mouseY) {
 		if (inputs != null) {
 			for (int i = 0; i < inputs.length; i++) {
 				
@@ -237,34 +231,34 @@ class AndGate extends Component {
 		inputs = new Pin[2];
 		outputs = new Pin[1];
 		initPins(componentNumber);
-		setPinLocations(0, 0);
+		setPinLocations();
 	}
 	
-	void setPinLocations(int gridX, int gridY) {
+	void setPinLocations() {
 		
-		outputs[0].setXY(x + w, y + h / 2, gridX, gridY);
-		inputs[0].setXY(x, y + h / 4, gridX, gridY);
-		inputs[1].setXY(x, y + h * 3 / 4, gridX, gridY);
+		outputs[0].setXY(x + w, y + h / 2);
+		inputs[0].setXY(x, y + h / 4);
+		inputs[1].setXY(x, y + h * 3 / 4);
 	}
 
 	@Override
-	void draw(Graphics2D g, int gridX, int gridY) {
-		int xOffset = Util.modPos(gridX, Simulator.gridSize);
-		int gridOffsetX = (gridX - xOffset) / Simulator.gridSize;
+	void draw(Graphics2D g, int gridX, int gridY, int gridSize) {
+		int xOffset = Util.modPos(gridX, gridSize);
+		int gridOffsetX = (gridX - xOffset) / gridSize;
 
-		int yOffset = Util.modPos(gridY, Simulator.gridSize);
-		int gridOffsetY = (gridY - yOffset) / Simulator.gridSize;
+		int yOffset = Util.modPos(gridY, gridSize);
+		int gridOffsetY = (gridY - yOffset) / gridSize;
 		
 		g.setColor(Color.BLACK);
 		g.setStroke(Simulator.thickStroke);
-		int lineX = (x + gridOffsetX)*Simulator.gridSize + xOffset;
-		int lineY = (y + gridOffsetY)*Simulator.gridSize + yOffset;
-		g.drawLine(lineX, lineY, lineX, lineY + h*Simulator.gridSize);
-		g.drawArc(lineX - w*Simulator.gridSize, lineY, (w * 2)*Simulator.gridSize, h*Simulator.gridSize, 90, -180);
-		setPinLocations(gridX, gridY);
-		outputs[0].draw(g);
-		inputs[0].draw(g);
-		inputs[1].draw(g);
+		int lineX = (x + gridOffsetX)*gridSize + xOffset;
+		int lineY = (y + gridOffsetY)*gridSize + yOffset;
+		g.drawLine(lineX, lineY, lineX, lineY + h*gridSize);
+		g.drawArc(lineX - w*gridSize, lineY, (w * 2)*gridSize, h*gridSize, 90, -180);
+		setPinLocations();
+		outputs[0].draw(g, gridX, gridY, gridSize);
+		inputs[0].draw(g, gridX, gridY, gridSize);
+		inputs[1].draw(g, gridX, gridY, gridSize);
 	}
 
 	@Override
@@ -300,37 +294,36 @@ class NandGate extends Component {
 		inputs = new Pin[2];
 		outputs = new Pin[1];
 		initPins(componentNumber);
-		setPinLocations(0, 0);
+		setPinLocations();
 	}
 	
-	void setPinLocations(int gridX, int gridY) {
-		int notR = Simulator.gridSize/2;
-		outputs[0].setXY((x + w) + notR*2/Simulator.gridSize, (y + h / 2), gridX, gridY);
+	void setPinLocations() {
+		outputs[0].setXY((x + w) + 1, (y + h / 2));
 
-		inputs[0].setXY(x, (y + h / 4), gridX, gridY);
-		inputs[1].setXY(x, (y + h * 3 / 4), gridX, gridY);
+		inputs[0].setXY(x, (y + h / 4));
+		inputs[1].setXY(x, (y + h * 3 / 4));
 	}
 
 	@Override
-	void draw(Graphics2D g, int gridX, int gridY) {
-		int xOffset = Util.modPos(gridX, Simulator.gridSize);
-		int gridOffsetX = (gridX - xOffset) / Simulator.gridSize;
+	void draw(Graphics2D g, int gridX, int gridY, int gridSize) {
+		int xOffset = Util.modPos(gridX, gridSize);
+		int gridOffsetX = (gridX - xOffset) / gridSize;
 
-		int yOffset = Util.modPos(gridY, Simulator.gridSize);
-		int gridOffsetY = (gridY - yOffset) / Simulator.gridSize;
+		int yOffset = Util.modPos(gridY, gridSize);
+		int gridOffsetY = (gridY - yOffset) / gridSize;
 		
 		g.setColor(Color.BLACK);
 		g.setStroke(Simulator.thickStroke);
-		int lineX = (x + gridOffsetX)*Simulator.gridSize + xOffset;
-		int lineY = (y + gridOffsetY)*Simulator.gridSize + yOffset;
-		g.drawLine(lineX, lineY, lineX, lineY + h*Simulator.gridSize);
-		g.drawArc(lineX - w*Simulator.gridSize, lineY, (w * 2)*Simulator.gridSize, h*Simulator.gridSize, 90, -180);
-		int notR = Simulator.gridSize/2;
-		g.drawOval((x+w+gridOffsetX)*Simulator.gridSize+xOffset, (y+h/2+gridOffsetY)*Simulator.gridSize-notR + yOffset, 2*notR, 2*notR);
-		setPinLocations(gridX, gridY);
-		outputs[0].draw(g);
-		inputs[0].draw(g);
-		inputs[1].draw(g);
+		int lineX = (x + gridOffsetX)*gridSize + xOffset;
+		int lineY = (y + gridOffsetY)*gridSize + yOffset;
+		g.drawLine(lineX, lineY, lineX, lineY + h*gridSize);
+		g.drawArc(lineX - w*gridSize, lineY, (w * 2)*gridSize, h*gridSize, 90, -180);
+		int notR = gridSize/2;
+		g.drawOval((x+w+gridOffsetX)*gridSize+xOffset, (y+h/2+gridOffsetY)*gridSize-notR + yOffset, 2*notR, 2*notR);
+		setPinLocations();
+		outputs[0].draw(g, gridX, gridY, gridSize);
+		inputs[0].draw(g, gridX, gridY, gridSize);
+		inputs[1].draw(g, gridX, gridY, gridSize);
 	}
 
 	@Override
@@ -365,34 +358,34 @@ class OrGate extends Component {
 		inputs = new Pin[2];
 		outputs = new Pin[1];
 		initPins(componentNumber);
-		setPinLocations(0, 0);
+		setPinLocations();
 	}
 	
-	void setPinLocations(int gridX, int gridY) {
-		outputs[0].setXY((x + w), (y + h / 2), gridX, gridY);
-		inputs[0].setXY(x, (y + h / 4), gridX, gridY);
-		inputs[1].setXY(x, (y + h * 3 / 4), gridX, gridY);
+	void setPinLocations() {
+		outputs[0].setXY((x + w), (y + h / 2));
+		inputs[0].setXY(x, (y + h / 4));
+		inputs[1].setXY(x, (y + h * 3 / 4));
 	}
 
 	@Override
-	void draw(Graphics2D g, int gridX, int gridY) {
-		int xOffset = Util.modPos(gridX, Simulator.gridSize);
-		int gridOffsetX = (gridX - xOffset) / Simulator.gridSize;
+	void draw(Graphics2D g, int gridX, int gridY, int gridSize) {
+		int xOffset = Util.modPos(gridX, gridSize);
+		int gridOffsetX = (gridX - xOffset) / gridSize;
 
-		int yOffset = Util.modPos(gridY, Simulator.gridSize);
-		int gridOffsetY = (gridY - yOffset) / Simulator.gridSize;
+		int yOffset = Util.modPos(gridY, gridSize);
+		int gridOffsetY = (gridY - yOffset) / gridSize;
 		
 		g.setColor(Color.BLACK);
 		g.setStroke(Simulator.thickStroke);
-		int curveR = (int) (1.5*h*Simulator.gridSize);
-		int dx = (int) Math.sqrt(curveR*curveR - (h/2)*h/2*Simulator.gridSize*Simulator.gridSize);
-		int angle = (int) Math.toDegrees(Math.asin(h*Simulator.gridSize/(2.0*curveR)));
-		g.drawArc((x+gridOffsetX)*Simulator.gridSize+xOffset-curveR-dx, (y + h/2 + gridOffsetY)*Simulator.gridSize + yOffset - curveR, curveR*2, curveR*2, angle, -2*angle);
-		g.drawArc((x - w + gridOffsetX)*Simulator.gridSize + xOffset, (y+gridOffsetY)*Simulator.gridSize + yOffset, w * 2*Simulator.gridSize, h*Simulator.gridSize, 90, -180);
-		setPinLocations(gridX, gridY);
-		outputs[0].draw(g);
-		inputs[0].draw(g);
-		inputs[1].draw(g);
+		int curveR = (int) (1.5*h*gridSize);
+		int dx = (int) Math.sqrt(curveR*curveR - (h/2)*h/2*gridSize*gridSize);
+		int angle = (int) Math.toDegrees(Math.asin(h*gridSize/(2.0*curveR)));
+		g.drawArc((x+gridOffsetX)*gridSize+xOffset-curveR-dx, (y + h/2 + gridOffsetY)*gridSize + yOffset - curveR, curveR*2, curveR*2, angle, -2*angle);
+		g.drawArc((x - w + gridOffsetX)*gridSize + xOffset, (y+gridOffsetY)*gridSize + yOffset, w * 2*gridSize, h*gridSize, 90, -180);
+		setPinLocations();
+		outputs[0].draw(g, gridX, gridY, gridSize);
+		inputs[0].draw(g, gridX, gridY, gridSize);
+		inputs[1].draw(g, gridX, gridY, gridSize);
 	}
 
 	@Override
@@ -429,34 +422,33 @@ class NorGate extends Component {
 		initPins(componentNumber);
 	}
 	
-	void setPinLocations(int gridX, int gridY) {
-		int notR = Simulator.gridSize/2;
-		outputs[0].setXY((x + w) + notR*2/Simulator.gridSize, (y + h / 2), gridX, gridY);
-		inputs[0].setXY(x, (y + h / 4), gridX, gridY);
-		inputs[1].setXY(x, (y + h * 3 / 4), gridX, gridY);
+	void setPinLocations() {
+		outputs[0].setXY((x + w) + 1, (y + h / 2));
+		inputs[0].setXY(x, (y + h / 4));
+		inputs[1].setXY(x, (y + h * 3 / 4));
 	}
 
 	@Override
-	void draw(Graphics2D g, int gridX, int gridY) {
-		int xOffset = Util.modPos(gridX, Simulator.gridSize);
-		int gridOffsetX = (gridX - xOffset) / Simulator.gridSize;
+	void draw(Graphics2D g, int gridX, int gridY, int gridSize) {
+		int xOffset = Util.modPos(gridX, gridSize);
+		int gridOffsetX = (gridX - xOffset) / gridSize;
 
-		int yOffset = Util.modPos(gridY, Simulator.gridSize);
-		int gridOffsetY = (gridY - yOffset) / Simulator.gridSize;
+		int yOffset = Util.modPos(gridY, gridSize);
+		int gridOffsetY = (gridY - yOffset) / gridSize;
 		
 		g.setColor(Color.BLACK);
 		g.setStroke(Simulator.thickStroke);
-		int curveR = (int) (1.5*h*Simulator.gridSize);
-		int dx = (int) Math.sqrt(curveR*curveR - (h/2)*h/2*Simulator.gridSize*Simulator.gridSize);
-		int angle = (int) Math.toDegrees(Math.asin(h*Simulator.gridSize/(2.0*curveR)));
-		g.drawArc((x+gridOffsetX)*Simulator.gridSize+xOffset-curveR-dx, (y + h/2 + gridOffsetY)*Simulator.gridSize + yOffset - curveR, curveR*2, curveR*2, angle, -2*angle);
-		g.drawArc((x - w + gridOffsetX)*Simulator.gridSize + xOffset, (y+gridOffsetY)*Simulator.gridSize + yOffset, w * 2*Simulator.gridSize, h*Simulator.gridSize, 90, -180);
-		int notR = Simulator.gridSize/2;
-		g.drawOval((x+w+gridOffsetX)*Simulator.gridSize + xOffset, (y+h/2+gridOffsetY)*Simulator.gridSize-notR + yOffset, 2*notR, 2*notR);
-		setPinLocations(gridX, gridY);
-		outputs[0].draw(g);
-		inputs[0].draw(g);
-		inputs[1].draw(g);
+		int curveR = (int) (1.5*h*gridSize);
+		int dx = (int) Math.sqrt(curveR*curveR - (h/2)*h/2*gridSize*gridSize);
+		int angle = (int) Math.toDegrees(Math.asin(h*gridSize/(2.0*curveR)));
+		g.drawArc((x+gridOffsetX)*gridSize+xOffset-curveR-dx, (y + h/2 + gridOffsetY)*gridSize + yOffset - curveR, curveR*2, curveR*2, angle, -2*angle);
+		g.drawArc((x - w + gridOffsetX)*gridSize + xOffset, (y+gridOffsetY)*gridSize + yOffset, w * 2*gridSize, h*gridSize, 90, -180);
+		int notR = gridSize/2;
+		g.drawOval((x+w+gridOffsetX)*gridSize + xOffset, (y+h/2+gridOffsetY)*gridSize-notR + yOffset, 2*notR, 2*notR);
+		setPinLocations();
+		outputs[0].draw(g, gridX, gridY, gridSize);
+		inputs[0].draw(g, gridX, gridY, gridSize);
+		inputs[1].draw(g, gridX, gridY, gridSize);
 	}
 
 	@Override
@@ -493,33 +485,33 @@ class XorGate extends Component {
 		initPins(componentNumber);
 	}
 	
-	void setPinLocations(int gridX, int gridY) {
-		outputs[0].setXY((x + w), (y + h / 2), gridX, gridY);
-		inputs[0].setXY(x, (y + h / 4), gridX, gridY);
-		inputs[1].setXY(x, (y + h * 3 / 4), gridX, gridY);
+	void setPinLocations() {
+		outputs[0].setXY((x + w), (y + h / 2));
+		inputs[0].setXY(x, (y + h / 4));
+		inputs[1].setXY(x, (y + h * 3 / 4));
 	}
 
 	@Override
-	void draw(Graphics2D g, int gridX, int gridY) {
-		int xOffset = Util.modPos(gridX, Simulator.gridSize);
-		int gridOffsetX = (gridX - xOffset) / Simulator.gridSize;
+	void draw(Graphics2D g, int gridX, int gridY, int gridSize) {
+		int xOffset = Util.modPos(gridX, gridSize);
+		int gridOffsetX = (gridX - xOffset) / gridSize;
 
-		int yOffset = Util.modPos(gridY, Simulator.gridSize);
-		int gridOffsetY = (gridY - yOffset) / Simulator.gridSize;
+		int yOffset = Util.modPos(gridY, gridSize);
+		int gridOffsetY = (gridY - yOffset) / gridSize;
 		
 		g.setColor(Color.BLACK);
 		g.setStroke(Simulator.thickStroke);
-		int curveR = (int) (1.5*h*Simulator.gridSize);
-		int dx = (int) Math.sqrt(curveR*curveR - (h/2)*h/2*Simulator.gridSize*Simulator.gridSize);
-		int angle = (int) Math.toDegrees(Math.asin(h*Simulator.gridSize/(2.0*curveR)));
-		g.drawArc((x+gridOffsetX)*Simulator.gridSize+xOffset-curveR-dx, (y + h/2 + gridOffsetY)*Simulator.gridSize + yOffset - curveR, curveR*2, curveR*2, angle, -2*angle);
-		g.drawArc((x - w + gridOffsetX)*Simulator.gridSize + xOffset, (y+gridOffsetY)*Simulator.gridSize + yOffset, w * 2*Simulator.gridSize, h*Simulator.gridSize, 90, -180);
-		g.drawArc((x+gridOffsetX)*Simulator.gridSize - w*Simulator.gridSize/4+xOffset-curveR-dx, (y + h/2 + gridOffsetY)*Simulator.gridSize + yOffset - curveR, curveR*2, curveR*2, angle, -2*angle);
+		int curveR = (int) (1.5*h*gridSize);
+		int dx = (int) Math.sqrt(curveR*curveR - (h/2)*h/2*gridSize*gridSize);
+		int angle = (int) Math.toDegrees(Math.asin(h*gridSize/(2.0*curveR)));
+		g.drawArc((x+gridOffsetX)*gridSize+xOffset-curveR-dx, (y + h/2 + gridOffsetY)*gridSize + yOffset - curveR, curveR*2, curveR*2, angle, -2*angle);
+		g.drawArc((x - w + gridOffsetX)*gridSize + xOffset, (y+gridOffsetY)*gridSize + yOffset, w * 2*gridSize, h*gridSize, 90, -180);
+		g.drawArc((x+gridOffsetX)*gridSize - w*gridSize/4+xOffset-curveR-dx, (y + h/2 + gridOffsetY)*gridSize + yOffset - curveR, curveR*2, curveR*2, angle, -2*angle);
 
-		setPinLocations(gridX, gridY);
-		outputs[0].draw(g);
-		inputs[0].draw(g);
-		inputs[1].draw(g);
+		setPinLocations();
+		outputs[0].draw(g, gridX, gridY, gridSize);
+		inputs[0].draw(g, gridX, gridY, gridSize);
+		inputs[1].draw(g, gridX, gridY, gridSize);
 	}
 
 	@Override
@@ -556,36 +548,35 @@ class XnorGate extends Component {
 		initPins(componentNumber);
 	}
 	
-	void setPinLocations(int gridX, int gridY) {
-		int notR = Simulator.gridSize/2;
-		outputs[0].setXY((x + w) + 1, y + h / 2, gridX, gridY);
-		inputs[0].setXY(x, (y + h / 4), gridX, gridY);
-		inputs[1].setXY(x, (y + h * 3 / 4), gridX, gridY);
+	void setPinLocations() {
+		outputs[0].setXY((x + w) + 1, y + h / 2);
+		inputs[0].setXY(x, (y + h / 4));
+		inputs[1].setXY(x, (y + h * 3 / 4));
 	}
 
 	@Override
-	void draw(Graphics2D g, int gridX, int gridY) {
-		int xOffset = Util.modPos(gridX, Simulator.gridSize);
-		int gridOffsetX = (gridX - xOffset) / Simulator.gridSize;
+	void draw(Graphics2D g, int gridX, int gridY, int gridSize) {
+		int xOffset = Util.modPos(gridX, gridSize);
+		int gridOffsetX = (gridX - xOffset) / gridSize;
 
-		int yOffset = Util.modPos(gridY, Simulator.gridSize);
-		int gridOffsetY = (gridY - yOffset) / Simulator.gridSize;
+		int yOffset = Util.modPos(gridY, gridSize);
+		int gridOffsetY = (gridY - yOffset) / gridSize;
 		
 		g.setColor(Color.BLACK);
 		g.setStroke(Simulator.thickStroke);
-		int curveR = (int) (1.5*h*Simulator.gridSize);
-		int dx = (int) Math.sqrt(curveR*curveR - (h/2)*h/2*Simulator.gridSize*Simulator.gridSize);
-		int angle = (int) Math.toDegrees(Math.asin(h*Simulator.gridSize/(2.0*curveR)));
-		g.drawArc((x+gridOffsetX)*Simulator.gridSize+xOffset-curveR-dx, (y + h/2 + gridOffsetY)*Simulator.gridSize + yOffset - curveR, curveR*2, curveR*2, angle, -2*angle);
-		g.drawArc((x - w + gridOffsetX)*Simulator.gridSize + xOffset, (y+gridOffsetY)*Simulator.gridSize + yOffset, w * 2*Simulator.gridSize, h*Simulator.gridSize, 90, -180);
-		g.drawArc((x+gridOffsetX)*Simulator.gridSize - w*Simulator.gridSize/4 +xOffset-curveR-dx, (y + h/2 + gridOffsetY)*Simulator.gridSize + yOffset - curveR, curveR*2, curveR*2, angle, -2*angle);
+		int curveR = (int) (1.5*h*gridSize);
+		int dx = (int) Math.sqrt(curveR*curveR - (h/2)*h/2*gridSize*gridSize);
+		int angle = (int) Math.toDegrees(Math.asin(h*gridSize/(2.0*curveR)));
+		g.drawArc((x+gridOffsetX)*gridSize+xOffset-curveR-dx, (y + h/2 + gridOffsetY)*gridSize + yOffset - curveR, curveR*2, curveR*2, angle, -2*angle);
+		g.drawArc((x - w + gridOffsetX)*gridSize + xOffset, (y+gridOffsetY)*gridSize + yOffset, w * 2*gridSize, h*gridSize, 90, -180);
+		g.drawArc((x+gridOffsetX)*gridSize - w*gridSize/4 +xOffset-curveR-dx, (y + h/2 + gridOffsetY)*gridSize + yOffset - curveR, curveR*2, curveR*2, angle, -2*angle);
 		
-		int notR = Simulator.gridSize/2;
-		g.drawOval((x+w+gridOffsetX)*Simulator.gridSize + xOffset, (y+h/2 + gridOffsetY)*Simulator.gridSize + yOffset - notR, 2*notR, 2*notR);
-		setPinLocations(gridX, gridY);
-		outputs[0].draw(g);
-		inputs[0].draw(g);
-		inputs[1].draw(g);
+		int notR = gridSize/2;
+		g.drawOval((x+w+gridOffsetX)*gridSize + xOffset, (y+h/2 + gridOffsetY)*gridSize + yOffset - notR, 2*notR, 2*notR);
+		setPinLocations();
+		outputs[0].draw(g, gridX, gridY, gridSize);
+		inputs[0].draw(g, gridX, gridY, gridSize);
+		inputs[1].draw(g, gridX, gridY, gridSize);
 	}
 
 	@Override
@@ -618,39 +609,39 @@ class Inverter extends Component {
 	Inverter(int componentNumber) {
 		inputs = new Pin[1];
 		outputs = new Pin[1];
-		initPins(componentNumber, Simulator.gridSize/2);
+		initPins(componentNumber);
 	}
 	
-	void setPinLocations(int gridX, int gridY) {
-		outputs[0].setXY((this.x+w), (this.y+h/2), gridX, gridY);
-		inputs[0].setXY((this.x), (this.y+h/2), gridX, gridY);
+	void setPinLocations() {
+		outputs[0].setXY((this.x+w), (this.y+h/2));
+		inputs[0].setXY((this.x), (this.y+h/2));
 	}
 	
-	void draw(Graphics2D g, int gridX, int gridY) {
-		int xOffset = Util.modPos(gridX, Simulator.gridSize);
-		int gridOffsetX = (gridX - xOffset) / Simulator.gridSize;
+	void draw(Graphics2D g, int gridX, int gridY, int gridSize) {
+		int xOffset = Util.modPos(gridX, gridSize);
+		int gridOffsetX = (gridX - xOffset) / gridSize;
 
-		int yOffset = Util.modPos(gridY, Simulator.gridSize);
-		int gridOffsetY = (gridY - yOffset) / Simulator.gridSize;
+		int yOffset = Util.modPos(gridY, gridSize);
+		int gridOffsetY = (gridY - yOffset) / gridSize;
 		
 		int[] x = new int[3];
 		int[] y = new int[3];
 		
-		x[0] = (this.x + gridOffsetX)*Simulator.gridSize + xOffset;
-		x[1] = (this.x + gridOffsetX)*Simulator.gridSize + xOffset;
-		x[2] = (this.x + gridOffsetX + w)*Simulator.gridSize + xOffset;
+		x[0] = (this.x + gridOffsetX)*gridSize + xOffset;
+		x[1] = (this.x + gridOffsetX)*gridSize + xOffset;
+		x[2] = (this.x + gridOffsetX + w)*gridSize + xOffset;
 		
-		y[0] = (this.y + gridOffsetY)*Simulator.gridSize + yOffset;
-		y[1] = (this.y + gridOffsetY + h)*Simulator.gridSize + yOffset;
-		y[2] = (this.y + gridOffsetY + h/2)*Simulator.gridSize + yOffset;
+		y[0] = (this.y + gridOffsetY)*gridSize + yOffset;
+		y[1] = (this.y + gridOffsetY + h)*gridSize + yOffset;
+		y[2] = (this.y + gridOffsetY + h/2)*gridSize + yOffset;
 		
 		g.setColor(Color.BLACK);
 		g.setStroke(Simulator.thickStroke);
 		g.drawPolygon(x, y, 3);
 		
-		setPinLocations(gridX, gridY);
-		outputs[0].draw(g);
-		inputs[0].draw(g);
+		setPinLocations();
+		outputs[0].draw(g, gridX, gridY, gridSize);
+		inputs[0].draw(g, gridX, gridY, gridSize);
 	}
 
 	@Override
@@ -681,8 +672,8 @@ class Input extends Component {
 	Input(int componentNumber) {
 		inputs = new Pin[0];
 		outputs = new Pin[1];
-		initPins(componentNumber, (h*Simulator.gridSize / 4));
-		setPinLocations(0, 0);
+		initPins(componentNumber);
+		setPinLocations();
 	}
 	
 	String text() {
@@ -697,28 +688,28 @@ class Input extends Component {
 		return "error: invalid state";
 	}
 	
-	void setPinLocations(int gridX, int gridY) {
-		outputs[0].setXY((x + w), (y + h / 2), gridX, gridY);
+	void setPinLocations() {
+		outputs[0].setXY((x + w), (y + h / 2));
 	}
 
 	@Override
-	void draw(Graphics2D g, int gridX, int gridY) {
-		int xOffset = Util.modPos(gridX, Simulator.gridSize);
-		int gridOffsetX = (gridX - xOffset) / Simulator.gridSize;
+	void draw(Graphics2D g, int gridX, int gridY, int gridSize) {
+		int xOffset = Util.modPos(gridX, gridSize);
+		int gridOffsetX = (gridX - xOffset) / gridSize;
 
-		int yOffset = Util.modPos(gridY, Simulator.gridSize);
-		int gridOffsetY = (gridY - yOffset) / Simulator.gridSize;
+		int yOffset = Util.modPos(gridY, gridSize);
+		int gridOffsetY = (gridY - yOffset) / gridSize;
 		
 		g.setColor(Color.BLACK);
 		g.setStroke(Simulator.thickStroke);
 		String s = text();
 		int textWidth = g.getFontMetrics().stringWidth(s);
 		int textHeight = g.getFontMetrics().getHeight();
-		g.drawRect((x+gridOffsetX)*Simulator.gridSize + xOffset, (y+gridOffsetY)*Simulator.gridSize + yOffset, w*Simulator.gridSize, h*Simulator.gridSize);
-		g.drawString(s, (x + gridOffsetX + w / 2)*Simulator.gridSize + xOffset - textWidth / 2, (y + gridOffsetY + h / 2)*Simulator.gridSize + yOffset + textHeight / 2);
+		g.drawRect((x+gridOffsetX)*gridSize + xOffset, (y+gridOffsetY)*gridSize + yOffset, w*gridSize, h*gridSize);
+		g.drawString(s, (x + gridOffsetX + w / 2)*gridSize + xOffset - textWidth / 2, (y + gridOffsetY + h / 2)*gridSize + yOffset + textHeight / 2);
 
-		setPinLocations(gridX, gridY);
-		outputs[0].draw(g);
+		setPinLocations();
+		outputs[0].draw(g, gridX, gridY, gridSize);
 	}
 
 	@Override
@@ -752,12 +743,12 @@ class Output extends Component {
 	Output(int componentNumber) {
 		inputs = new Pin[1];
 		outputs = new Pin[0];
-		initPins(componentNumber, h*Simulator.gridSize / 4);
+		initPins(componentNumber);
 	}
 
 
-	void setPinLocations(int gridX, int gridY) {
-		inputs[0].setXY(x, (y + h / 2), gridX, gridY);
+	void setPinLocations() {
+		inputs[0].setXY(x, (y + h / 2));
 	}
 	
 	String text() {
@@ -773,24 +764,24 @@ class Output extends Component {
 	}
 
 	@Override
-	void draw(Graphics2D g, int gridX, int gridY) {
+	void draw(Graphics2D g, int gridX, int gridY, int gridSize) {
 
-		int xOffset = Util.modPos(gridX, Simulator.gridSize);
-		int gridOffsetX = (gridX - xOffset) / Simulator.gridSize;
+		int xOffset = Util.modPos(gridX, gridSize);
+		int gridOffsetX = (gridX - xOffset) / gridSize;
 
-		int yOffset = Util.modPos(gridY, Simulator.gridSize);
-		int gridOffsetY = (gridY - yOffset) / Simulator.gridSize;
+		int yOffset = Util.modPos(gridY, gridSize);
+		int gridOffsetY = (gridY - yOffset) / gridSize;
 		
 		g.setColor(Color.BLACK);
 		g.setStroke(Simulator.thickStroke);
 		String s = text();
 		int textWidth = g.getFontMetrics().stringWidth(s);
 		int textHeight = g.getFontMetrics().getHeight();
-		g.drawRect((x + gridOffsetX)*Simulator.gridSize + xOffset, (y + gridOffsetY)*Simulator.gridSize + yOffset, w*Simulator.gridSize, h*Simulator.gridSize);
-		g.drawString(s, (x + gridOffsetX + w / 2)*Simulator.gridSize + xOffset - textWidth / 2, (y + gridOffsetY + h / 2)*Simulator.gridSize + yOffset + textHeight / 2);
+		g.drawRect((x + gridOffsetX)*gridSize + xOffset, (y + gridOffsetY)*gridSize + yOffset, w*gridSize, h*gridSize);
+		g.drawString(s, (x + gridOffsetX + w / 2)*gridSize + xOffset - textWidth / 2, (y + gridOffsetY + h / 2)*gridSize + yOffset + textHeight / 2);
 
-		setPinLocations(gridX, gridY);
-		inputs[0].draw(g);
+		setPinLocations();
+		inputs[0].draw(g, gridX, gridY, gridSize);
 	}
 
 	@Override
@@ -820,8 +811,8 @@ class DFlipFlop extends Component {
 	DFlipFlop(int componentNumber) {
 		inputs = new Pin[2];
 		outputs = new Pin[2];
-		initPins(componentNumber, (h*Simulator.gridSize / 8));
-		setPinLocations(0, 0);
+		initPins(componentNumber);
+		setPinLocations();
 	}
 	
 	String text() {
@@ -836,34 +827,34 @@ class DFlipFlop extends Component {
 		return "error: invalid state";
 	}
 	
-	void setPinLocations(int gridX, int gridY) {
-		outputs[0].setXY((x + w), (y + 1), gridX, gridY);
-		outputs[1].setXY((x+w), y+3, gridX, gridY);
-		inputs[0].setXY(x, y+1, gridX, gridY);
-		inputs[1].setXY(x, y+3, gridX, gridY);
+	void setPinLocations() {
+		outputs[0].setXY((x + w), (y + 1));
+		outputs[1].setXY((x+w), y+3);
+		inputs[0].setXY(x, y+1);
+		inputs[1].setXY(x, y+3);
 	}
 
 	@Override
-	void draw(Graphics2D g, int gridX, int gridY) {
-		int xOffset = Util.modPos(gridX, Simulator.gridSize);
-		int gridOffsetX = (gridX - xOffset) / Simulator.gridSize;
+	void draw(Graphics2D g, int gridX, int gridY, int gridSize) {
+		int xOffset = Util.modPos(gridX, gridSize);
+		int gridOffsetX = (gridX - xOffset) / gridSize;
 
-		int yOffset = Util.modPos(gridY, Simulator.gridSize);
-		int gridOffsetY = (gridY - yOffset) / Simulator.gridSize;
+		int yOffset = Util.modPos(gridY, gridSize);
+		int gridOffsetY = (gridY - yOffset) / gridSize;
 		
 		g.setColor(Color.BLACK);
 		g.setStroke(Simulator.thickStroke);
 		String s = "D";
 		int textWidth = g.getFontMetrics().stringWidth(s);
 		int textHeight = g.getFontMetrics().getHeight();
-		g.drawRect((x+gridOffsetX)*Simulator.gridSize + xOffset, (y+gridOffsetY)*Simulator.gridSize + yOffset, w*Simulator.gridSize, h*Simulator.gridSize);
-		g.drawString(s, (x + gridOffsetX + w / 2)*Simulator.gridSize + xOffset - textWidth / 2, (y + gridOffsetY + h / 2)*Simulator.gridSize + yOffset + textHeight / 2);
+		g.drawRect((x+gridOffsetX)*gridSize + xOffset, (y+gridOffsetY)*gridSize + yOffset, w*gridSize, h*gridSize);
+		g.drawString(s, (x + gridOffsetX + w / 2)*gridSize + xOffset - textWidth / 2, (y + gridOffsetY + h / 2)*gridSize + yOffset + textHeight / 2);
 
-		setPinLocations(gridX, gridY);
-		inputs[0].draw(g);
-		inputs[1].draw(g);
-		outputs[0].draw(g);
-		outputs[1].draw(g);
+		setPinLocations();
+		inputs[0].draw(g, gridX, gridY, gridSize);
+		inputs[1].draw(g, gridX, gridY, gridSize);
+		outputs[0].draw(g, gridX, gridY, gridSize);
+		outputs[1].draw(g, gridX, gridY, gridSize);
 	}
 
 	@Override
@@ -897,8 +888,8 @@ class TFlipFlop extends Component {
 	TFlipFlop(int componentNumber) {
 		inputs = new Pin[3];
 		outputs = new Pin[2];
-		initPins(componentNumber, (h*Simulator.gridSize / 8));
-		setPinLocations(0, 0);
+		initPins(componentNumber);
+		setPinLocations();
 	}
 	
 	String text() {
@@ -913,36 +904,36 @@ class TFlipFlop extends Component {
 		return "error: invalid state";
 	}
 	
-	void setPinLocations(int gridX, int gridY) {
-		outputs[0].setXY((x + w), (y + 1), gridX, gridY);
-		outputs[1].setXY((x+w), y+3, gridX, gridY);
-		inputs[0].setXY(x, y+1, gridX, gridY);
-		inputs[1].setXY(x, y+3, gridX, gridY);
-		inputs[2].setXY(x+1, y+h, gridX, gridY);
+	void setPinLocations() {
+		outputs[0].setXY((x + w), (y + 1));
+		outputs[1].setXY((x+w), y+3);
+		inputs[0].setXY(x, y+1);
+		inputs[1].setXY(x, y+3);
+		inputs[2].setXY(x+1, y+h);
 	}
 
 	@Override
-	void draw(Graphics2D g, int gridX, int gridY) {
-		int xOffset = Util.modPos(gridX, Simulator.gridSize);
-		int gridOffsetX = (gridX - xOffset) / Simulator.gridSize;
+	void draw(Graphics2D g, int gridX, int gridY, int gridSize) {
+		int xOffset = Util.modPos(gridX, gridSize);
+		int gridOffsetX = (gridX - xOffset) / gridSize;
 
-		int yOffset = Util.modPos(gridY, Simulator.gridSize);
-		int gridOffsetY = (gridY - yOffset) / Simulator.gridSize;
+		int yOffset = Util.modPos(gridY, gridSize);
+		int gridOffsetY = (gridY - yOffset) / gridSize;
 		
 		g.setColor(Color.BLACK);
 		g.setStroke(Simulator.thickStroke);
 		String s = "T";
 		int textWidth = g.getFontMetrics().stringWidth(s);
 		int textHeight = g.getFontMetrics().getHeight();
-		g.drawRect((x+gridOffsetX)*Simulator.gridSize + xOffset, (y+gridOffsetY)*Simulator.gridSize + yOffset, w*Simulator.gridSize, h*Simulator.gridSize);
-		g.drawString(s, (x + gridOffsetX + w / 2)*Simulator.gridSize + xOffset - textWidth / 2, (y + gridOffsetY + h / 2)*Simulator.gridSize + yOffset + textHeight / 2);
+		g.drawRect((x+gridOffsetX)*gridSize + xOffset, (y+gridOffsetY)*gridSize + yOffset, w*gridSize, h*gridSize);
+		g.drawString(s, (x + gridOffsetX + w / 2)*gridSize + xOffset - textWidth / 2, (y + gridOffsetY + h / 2)*gridSize + yOffset + textHeight / 2);
 
-		setPinLocations(gridX, gridY);
-		inputs[0].draw(g);
-		inputs[1].draw(g);
-		inputs[2].draw(g);
-		outputs[0].draw(g);
-		outputs[1].draw(g);
+		setPinLocations();
+		inputs[0].draw(g, gridX, gridY, gridSize);
+		inputs[1].draw(g, gridX, gridY, gridSize);
+		inputs[2].draw(g, gridX, gridY, gridSize);
+		outputs[0].draw(g, gridX, gridY, gridSize);
+		outputs[1].draw(g, gridX, gridY, gridSize);
 	}
 
 	@Override

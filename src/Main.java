@@ -43,13 +43,7 @@ public class Main implements ComponentListener {
 	Toolbar toolbar;
 	
 	JFrame frame;
-	Canvas canvas;
 	JPanel panel;
-	Canvas toolbarCanvas;
-	BufferStrategy buffer;
-	BufferStrategy buffer2;
-	Graphics2D g;
-	Graphics2D g2;
 
 	SaveManager saveManager;
 	Simulator simulator;
@@ -74,9 +68,7 @@ public class Main implements ComponentListener {
 		try {
 			saveManager.askForFileBlocking(frame);
 			simulator = saveManager.loadSimulator();
-			simulator.width = canvas.getWidth();
-			simulator.height = canvas.getHeight();
-			attachSimulatorListeners();
+			attachSimulatorListeners(simulator);
 		} catch(IOException e) {
 			System.out.println("failed to load simulator.");
 			e.printStackTrace();
@@ -84,11 +76,9 @@ public class Main implements ComponentListener {
 	}
 	
 	void start() {
-		createFrame();
 		simulator = new Simulator();
-		simulator.width = canvas.getWidth();
-		simulator.height = canvas.getHeight();
-		attachSimulatorListeners();
+		createFrame();
+		attachSimulatorListeners(simulator);
 	}
 	
 	void run() {
@@ -103,7 +93,7 @@ public class Main implements ComponentListener {
 			if(now > lastFrameTime + frameDelay) {
 				draw();
 				lastFrameTime = now;
-				if(simulator.requestFocus) canvas.requestFocusInWindow();
+				if(simulator.requestFocus) simulator.requestFocusInWindow();
 			}
 			now = System.currentTimeMillis();
 			if(System.currentTimeMillis() > lastUpdateTime) {
@@ -117,31 +107,25 @@ public class Main implements ComponentListener {
 	void createFrame() {
 		frame = new JFrame(title);
 		System.out.println(toolbarHeight);
-		canvas = new Canvas();
-		toolbarCanvas = new Canvas();
-		canvas.setMaximumSize(new Dimension(10000, 10000));
-		canvas.setMinimumSize(new Dimension(width, height-toolbarHeight));
-		canvas.setPreferredSize(new Dimension(width, height-toolbarHeight));
-
-		toolbarCanvas.setMaximumSize(new Dimension(10000, toolbarHeight));
-		toolbarCanvas.setMinimumSize(new Dimension(0, toolbarHeight));
-		toolbarCanvas.setPreferredSize(new Dimension(width, toolbarHeight));
+		simulator.setMaximumSize(new Dimension(10000, 10000));
+		simulator.setMinimumSize(new Dimension(width, height-toolbarHeight));
+		simulator.setPreferredSize(new Dimension(width, height-toolbarHeight));
 		
 		panel = new JPanel();
 		toolbar = createToolbar(panel);
 
+		toolbar.setMaximumSize(new Dimension(10000, toolbarHeight));
+		toolbar.setMinimumSize(new Dimension(0, toolbarHeight));
+		toolbar.setPreferredSize(new Dimension(width, toolbarHeight));
+
 	    panel.setLayout(new BorderLayout());
-		panel.add(toolbarCanvas, BorderLayout.NORTH);
-		//panel.add(canvas, BorderLayout.SOUTH);
-		panel.add(canvas, BorderLayout.CENTER);
+		panel.add(toolbar, BorderLayout.NORTH);
+		panel.add(simulator, BorderLayout.CENTER);
 		
-		toolbar.width = width;
-		toolbar.height = toolbarHeight;
 		frame.add(panel);
 		frame.setSize(width, height);
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		//frame.addWindowStateListener(this);
 		frame.addWindowListener(new WindowAdapter() {
 			@Override
 		    public void windowClosing(WindowEvent e) {
@@ -159,48 +143,29 @@ public class Main implements ComponentListener {
 		    }
 		});
 		frame.pack();
-		System.out.println(toolbarCanvas.getHeight());
-		System.out.println(canvas.getHeight());
+		toolbar.addMouseListener(toolbar);
+		System.out.println(toolbar.getHeight());
+		System.out.println(simulator.getHeight());
 	}
 	
-	void attachSimulatorListeners() {
+	void attachSimulatorListeners(Simulator simulator) {
 		frame.addKeyListener(simulator);
 		frame.addComponentListener(this);
-		canvas.addComponentListener(this);
-		canvas.addMouseListener(simulator);
-		canvas.addMouseMotionListener(simulator);
-		canvas.addKeyListener(simulator);
+		simulator.addMouseListener(simulator);
+		simulator.addMouseMotionListener(simulator);
+		simulator.addKeyListener(simulator);
 		
-		toolbarCanvas.addMouseListener(toolbar);
 		System.out.println("listeners attached");
 	}
 	
 	void draw() {
-		buffer = canvas.getBufferStrategy();
-		buffer2 = toolbarCanvas.getBufferStrategy();
-		if (buffer == null) {
-			canvas.createBufferStrategy(3);
-			return;
-		}
-		if (buffer2 == null) {
-			toolbarCanvas.createBufferStrategy(3);
-			return;
-		}
-		g = (Graphics2D) buffer.getDrawGraphics();
-		g2 = (Graphics2D) buffer2.getDrawGraphics();
-		simulator.draw(g);
-		toolbar.draw(g2);
-		buffer.show();
-		g.dispose();
-		buffer2.show();
-		g2.dispose();
+		simulator.repaint();
+		toolbar.repaint();
 	}
 
 	void createNewSimulator() {
 		simulator = new Simulator();
-		simulator.width = canvas.getWidth();
-		simulator.height = canvas.getHeight();
-		attachSimulatorListeners();
+		attachSimulatorListeners(simulator);
 	}
 	
 	Toolbar createToolbar(JPanel panel) {
@@ -280,15 +245,7 @@ public class Main implements ComponentListener {
 	
 	@Override
 	public void componentResized(ComponentEvent e) {
-		java.awt.Component c = (java.awt.Component) e.getSource();
-		Dimension size = c.getSize();
-		int width = size.width;
-		int height = size.height;
-		
 		panel.setPreferredSize(new Dimension(frame.getContentPane().getWidth(), frame.getContentPane().getHeight()));
-		
-		simulator.width = width;
-		simulator.height = height;
 	}
 
 	@Override
