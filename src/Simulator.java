@@ -270,7 +270,6 @@ public class Simulator extends JComponent implements MouseListener, MouseMotionL
 	}
 
 	void onMouseDragged(MouseEvent e) {
-		System.out.println(gridX + ", " + gridY);
 		if(selectedComponentIndex != -1) {
 			components.get(selectedComponentIndex).x = snapToGridX(e.getX());
 			components.get(selectedComponentIndex).y = snapToGridY(e.getY());

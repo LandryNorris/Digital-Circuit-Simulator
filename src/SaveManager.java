@@ -34,7 +34,7 @@ import javax.swing.JFrame;
 public class SaveManager {
 	String fileType = ".dcs";
 
-	String directory = "SaveFiles/";
+	String directory = Application.settings.workspaceDirectory;
 	String fileName;
 	File file;
 	FileOutputStream fileOut;
@@ -65,7 +65,15 @@ public class SaveManager {
 	
 	void saveAs(JFrame frame, Simulator simulator) throws IOException {
 		JFileChooser fc = new JFileChooser();
-		fc.setCurrentDirectory(new File(directory));
+		File f = new File(directory);
+		if(!f.exists()) {
+			f.mkdir();
+		}
+		System.out.println(f.getPath());
+		System.out.println(System.getProperty("user.dir"));
+		fc.setCurrentDirectory(f);
+		
+		System.out.println(fc.getCurrentDirectory());
 		int returnVal = fc.showSaveDialog(frame);
 		System.out.println("opening save dialog");
 		while(returnVal != JFileChooser.APPROVE_OPTION && returnVal != JFileChooser.CANCEL_OPTION && returnVal != JFileChooser.ERROR_OPTION);
@@ -81,6 +89,10 @@ public class SaveManager {
 
 	void flush() {
 		try {
+			if(!file.exists()) {
+				System.out.println("creating new file");
+				file.createNewFile();
+			}
 			fileOut = new FileOutputStream(file);
 			writer = new BufferedOutputStream(fileOut);
 			byte[] bytes = data.toByteArray();

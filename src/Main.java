@@ -67,8 +67,11 @@ public class Main implements ComponentListener {
 		saveManager = new SaveManager();
 		try {
 			saveManager.askForFileBlocking(frame);
+			panel.remove(simulator);
 			simulator = saveManager.loadSimulator();
+			panel.add(simulator, BorderLayout.CENTER);
 			attachSimulatorListeners(simulator);
+			frame.pack();
 		} catch(IOException e) {
 			System.out.println("failed to load simulator.");
 			e.printStackTrace();
@@ -76,6 +79,8 @@ public class Main implements ComponentListener {
 	}
 	
 	void start() {
+		height = Application.settings.screenHeight;
+		width = Application.settings.screenWidth;
 		simulator = new Simulator();
 		createFrame();
 		attachSimulatorListeners(simulator);
@@ -114,8 +119,6 @@ public class Main implements ComponentListener {
 		panel = new JPanel();
 		toolbar = createToolbar(panel);
 
-		toolbar.setMaximumSize(new Dimension(10000, toolbarHeight));
-		toolbar.setMinimumSize(new Dimension(0, toolbarHeight));
 		toolbar.setPreferredSize(new Dimension(width, toolbarHeight));
 
 	    panel.setLayout(new BorderLayout());
@@ -129,17 +132,7 @@ public class Main implements ComponentListener {
 		frame.addWindowListener(new WindowAdapter() {
 			@Override
 		    public void windowClosing(WindowEvent e) {
-		    	System.out.println("closing program...");
-		        if(saveManager != null) {
-		        	try {
-						saveManager.close();
-					} catch(IOException e1) {
-						e1.printStackTrace();
-					}
-		        }
-		        frame.dispose();
-		    	System.out.println("program closed. Goodbye.");
-		        System.exit(0);
+		    	onExit();
 		    }
 		});
 		frame.pack();
@@ -154,18 +147,57 @@ public class Main implements ComponentListener {
 		simulator.addMouseListener(simulator);
 		simulator.addMouseMotionListener(simulator);
 		simulator.addKeyListener(simulator);
-		
 		System.out.println("listeners attached");
+	}
+	
+	void removeSimulatorListeners(Simulator simulator) {
+		frame.removeKeyListener(simulator);
+		simulator.removeMouseListener(simulator);
+		simulator.removeMouseMotionListener(simulator);
+		simulator.addKeyListener(simulator);
 	}
 	
 	void draw() {
 		simulator.repaint();
+		//System.out.println("drawing");
 		toolbar.repaint();
 	}
 
 	void createNewSimulator() {
+		removeSimulatorListeners(simulator);
+		panel.remove(simulator);
 		simulator = new Simulator();
+		simulator.setPreferredSize(new Dimension(width, height-toolbarHeight));
+		panel.add(simulator, BorderLayout.CENTER);
 		attachSimulatorListeners(simulator);
+		frame.pack();
+	}
+	
+	void onExit() {
+		System.out.println("closing program...");
+		saveProperties();
+        if(saveManager != null) {
+        	try {
+				saveManager.close();
+			} catch(IOException e1) {
+				e1.printStackTrace();
+			}
+        }
+        frame.dispose();
+    	System.out.println("program closed. Goodbye.");
+        System.exit(0);
+	}
+	
+	void saveProperties() {
+		Application.settings.screenWidth = frame.getWidth();
+		Application.settings.screenHeight = frame.getHeight();
+		
+		try {
+			Application.settings.writeToFile();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	Toolbar createToolbar(JPanel panel) {
@@ -236,8 +268,8 @@ public class Main implements ComponentListener {
 		
 		t.settingsListener = new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-			    System.out.println("Popup menu item ["
-			            + event.getActionCommand() + "] was pressed.");
+			    SettingsWindow sw = new SettingsWindow();
+			    System.out.println("opening settings");
 			}
 		};
 		return t;
