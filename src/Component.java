@@ -138,7 +138,7 @@ public abstract class Component {
 		if (inputs != null) {
 			for (int i = 0; i < inputs.length; i++) {
 				
-				if (inputs[i].x == x && inputs[i].y == y) {
+				if (inputs[i].points[0].x == x && inputs[i].points[0].y == y) {
 					return inputs[i];
 				}
 			}
@@ -146,7 +146,7 @@ public abstract class Component {
 
 		if (outputs != null) {
 			for (int i = 0; i < outputs.length; i++) {
-				if (outputs[i].x == x && outputs[i].y == y) {
+				if (outputs[i].points[0].x == x && outputs[i].points[0].y == y) {
 					return outputs[i];
 				}
 			}

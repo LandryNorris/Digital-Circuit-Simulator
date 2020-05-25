@@ -18,12 +18,14 @@ import java.awt.Graphics;
 import java.util.ArrayList;
 
 public class Wire {
-	Pin input;
-	Pin[] outputs;
+	Wire input;
+	Wire[] outputs;
 	
 	Coordinate[] points;
 	
 	byte state = -1;
+	
+	boolean hasInput = false;
 	
 	static Wire start(Pin pin) {
 		Wire w = new Wire();
@@ -37,8 +39,8 @@ public class Wire {
 			w.outputs = new Pin[0];
 		}
 		w.points = new Coordinate[2];
-		w.points[0] = new Coordinate((pin.x), (pin.y));
-		w.points[1] = new Coordinate(pin.x, pin.y);
+		w.points[0] = new Coordinate((pin.points[0].x), (pin.points[0].y));
+		w.points[1] = new Coordinate(pin.points[0].x, pin.points[0].y);
 		return w;
 	}
 	
@@ -62,6 +64,13 @@ public class Wire {
 	
 	void setState(byte s) {
 		state = s;
+		if(outputs == null) {
+			return;
+		}
+		for(int i = 0; i < outputs.length; i++) {
+			Wire wire = outputs[i];
+			wire.setState(s);
+		}
 	}
 	
 	void setState(boolean s) {
@@ -83,25 +92,19 @@ public class Wire {
 		g.setColor(getColor());
 		Coordinate last = points[0];
 		for(int i = 1; i < points.length; i++) {
+			int r = gridSize/3;
 			g.drawLine((last.x+gridOffsetX)*gridSize+xOffset, (last.y+gridOffsetY)*gridSize+yOffset, (points[i].x+gridOffsetX)*gridSize+xOffset, (points[i].y+gridOffsetY)*gridSize+yOffset);
-
-			//g.drawLine(last.x*gridSize, last.y*gridSize, points[i].x*gridSize, points[i].y*gridSize);
+			if(i != points.length-1) {
+				g.fillOval((points[i].x+gridOffsetX)*gridSize+xOffset-r, (points[i].y+gridOffsetY)*gridSize+yOffset-r, 2*r, 2*r);
+			}
 			last = points[i];
 		}
 	}
 	
-	void update(ArrayList<Component> components, ArrayList<Wire> wires) {
-		state = (input != null) ? Component.getState(components, input) : -1;
-		if(outputs == null) return;
-		for(Pin output: outputs) {
-			Component.setState(components, output, state);
-		}
-	}
-	
-	Pin addOutput(Pin pin) {
+	Wire addOutput(Wire pin) {
 		if(outputs == null) outputs = new Pin[0];
 		int newSize = outputs.length+1;
-		Pin[] newPins = new Pin[newSize];
+		Wire[] newPins = new Wire[newSize];
 		for(int i = 0; i < newSize-1; i++) {
 			newPins[i] = outputs[i];
 		}
@@ -120,6 +123,24 @@ public class Wire {
 		return null;
 	}
 	
+	boolean hasPointAt(Coordinate point) {
+		//inputs in grid coordinates
+		for(int i = 0; i < points.length; i++) {
+			if(points[i].x == point.x && points[i].y == point.y) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	boolean isOutput(Wire other) {
+		if(outputs == null) return false;
+		for(int i = 0; i < outputs.length; i++) {
+			if(outputs[i].equals(other)) return true;
+		}
+		return false;
+	}
+	
 	void setEndpoint(Coordinate c) {
 		points[points.length-1] = c;
 	}
@@ -131,5 +152,16 @@ public class Wire {
 			newPoints[i] = points[i];
 		}
 		points = newPoints;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if(!(o instanceof Wire)) return false;
+		Wire other = (Wire) o;
+		if(points == null || other.points == null || points.length != other.points.length) return false;
+		for(int i = 0; i < points.length; i++) {
+			if(points[i] != other.points[i]) return false;
+		}
+		return true;
 	}
 }

@@ -16,41 +16,47 @@
 import java.awt.Color;
 import java.awt.Graphics;
 
-public class Pin {
-	protected byte state = -1;
+public class Pin extends Wire {
 	boolean isInput;
 	boolean isWire = false;
 	
 	int pinNumber = 0;
 	int componentNumber = 0;
 	
-	int x;
-	int y;
 	double r = 0.5;
+	
+	{
+		points = new Coordinate[] {new Coordinate()};
+	}
 	
 	byte getState() {
 		return state;
 	}
 	
+	@Override
 	void setState(byte s) {
-		state = s;
+		if(isInput) {
+			state = s;
+		} else {
+			super.setState(s);
+		}
 	}
 	
 	void draw(Graphics g, int gridX, int gridY, int gridSize) {
-		int ovalX = (int) (Util.map(x, 0, 1, gridX, gridX + gridSize) - r*gridSize);
-		int ovalY = (int) (Util.map(y, 0, 1, gridY, gridY + gridSize) - r*gridSize);
+		int ovalX = (int) (Util.map(points[0].x, 0, 1, gridX, gridX + gridSize) - r*gridSize);
+		int ovalY = (int) (Util.map(points[0].y, 0, 1, gridY, gridY + gridSize) - r*gridSize);
 		g.setColor(Color.GREEN);
 		g.drawOval(ovalX, ovalY, (int) (r*2*gridSize), (int) (r*2*gridSize));
 	}
 	
 	void setXY(int x, int y) {
-		this.x = x;
-		this.y = y;
+		points[0].x = x;
+		points[0].y = y;
 	}
 	
 	boolean clicked(double mouseX, double mouseY) {
 		//x and y are in grid space
-		double distance = Math.sqrt((mouseX-x)*(mouseX-x) + (mouseY-y)*(mouseY-y));
+		double distance = Math.sqrt((mouseX-points[0].x)*(mouseX-points[0].x) + (mouseY-points[0].y)*(mouseY-points[0].y));
 		return distance < r;
 	}
 	
