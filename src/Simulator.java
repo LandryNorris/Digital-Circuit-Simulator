@@ -350,6 +350,10 @@ public class Simulator extends JComponent implements MouseListener, MouseMotionL
 			selectedComponentIndex = components.size();
 			components.add(new TFlipFlop(selectedComponentIndex));
 		}
+		
+		else if(e.getKeyChar() == 'l') {
+			new LegalWindow();
+		}
 	}
 
 	void onKeyPressed(KeyEvent e) {
