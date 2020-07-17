@@ -1,3 +1,5 @@
+package com.landry.digitalcircuitsimulator;
+
 import java.awt.Dimension;
 
 import javax.swing.JDialog;

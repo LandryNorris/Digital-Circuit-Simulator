@@ -1,3 +1,5 @@
+package com.landry.digitalcircuitsimulator;
+
 import java.io.IOException;
 
 public class Application {

@@ -1,3 +1,5 @@
+package com.landry.digitalcircuitsimulator;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.ComponentOrientation;

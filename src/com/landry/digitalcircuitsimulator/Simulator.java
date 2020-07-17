@@ -12,6 +12,7 @@
  You should have received a copy of the GNU General Public License
  along with the Digital Circuit Simulator Library.  If not, see http://www.gnu.org/licenses.
  */
+package com.landry.digitalcircuitsimulator;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -30,6 +31,19 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
+
+import com.landry.digitalcircuitsimulator.flipflops.DFlipFlop;
+import com.landry.digitalcircuitsimulator.flipflops.TFlipFlop;
+import com.landry.digitalcircuitsimulator.gates.AndGate;
+import com.landry.digitalcircuitsimulator.gates.Inverter;
+import com.landry.digitalcircuitsimulator.gates.NandGate;
+import com.landry.digitalcircuitsimulator.gates.NorGate;
+import com.landry.digitalcircuitsimulator.gates.OrGate;
+import com.landry.digitalcircuitsimulator.gates.XnorGate;
+import com.landry.digitalcircuitsimulator.gates.XorGate;
+import com.landry.digitalcircuitsimulator.inputs.Input;
+import com.landry.digitalcircuitsimulator.outputs.Output;
+import com.landry.digitalcircuitsimulator.roms.Rom8;
 
 public class Simulator extends JComponent implements MouseListener, MouseMotionListener, KeyListener {
 
@@ -53,7 +67,7 @@ public class Simulator extends JComponent implements MouseListener, MouseMotionL
 	int gridSize = 10;
 
 	static Stroke thinStroke = new BasicStroke(1F);
-	static Stroke thickStroke = new BasicStroke(2F);
+	public static Stroke thickStroke = new BasicStroke(2F);
 
 	MouseEvent mousePressedEvent;
 	MouseEvent mouseDraggedEvent;

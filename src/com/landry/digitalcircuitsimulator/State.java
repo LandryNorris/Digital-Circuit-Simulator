@@ -12,11 +12,12 @@
  You should have received a copy of the GNU General Public License
  along with the Digital Circuit Simulator Library.  If not, see http://www.gnu.org/licenses.
  */
+package com.landry.digitalcircuitsimulator;
 
 public class State {
-	final static byte TRUE = 1;
-	final static byte FALSE = 0;
-	final static byte HIGH = 1;
-	final static byte LOW = 0;
-	final static byte UNDEFINED = -1;
+	public final static byte TRUE = 1;
+	public final static byte FALSE = 0;
+	public final static byte HIGH = 1;
+	public final static byte LOW = 0;
+	public final static byte UNDEFINED = -1;
 }

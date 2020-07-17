@@ -1,3 +1,5 @@
+package com.landry.digitalcircuitsimulator;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 

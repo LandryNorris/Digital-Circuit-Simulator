@@ -12,6 +12,7 @@
  You should have received a copy of the GNU General Public License
  along with the Digital Circuit Simulator Library.  If not, see http://www.gnu.org/licenses.
  */
+package com.landry.digitalcircuitsimulator;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -30,6 +31,8 @@ import java.util.ArrayList;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+
+import com.landry.digitalcircuitsimulator.roms.Rom;
 
 public class SaveManager {
 	String fileType = ".dcs";
@@ -221,7 +224,7 @@ public class SaveManager {
 
 		int type = in.readInt();
 		
-		Component c = Component.create(type, componentNum);
+		Component c = Component.create(type);
 		int x = in.readInt();
 		int y = in.readInt();
 		c.x = x;

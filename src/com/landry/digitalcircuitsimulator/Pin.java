@@ -12,6 +12,7 @@
  You should have received a copy of the GNU General Public License
  along with the Digital Circuit Simulator Library.  If not, see http://www.gnu.org/licenses.
  */
+package com.landry.digitalcircuitsimulator;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -29,12 +30,12 @@ public class Pin extends Wire {
 		points = new Coordinate[] {new Coordinate()};
 	}
 	
-	byte getState() {
+	public byte getState() {
 		return state;
 	}
 	
 	@Override
-	void setState(byte s) {
+	public void setState(byte s) {
 		if(isInput) {
 			state = s;
 		} else {
@@ -42,14 +43,14 @@ public class Pin extends Wire {
 		}
 	}
 	
-	void draw(Graphics g, int gridX, int gridY, int gridSize) {
+	public void draw(Graphics g, int gridX, int gridY, int gridSize) {
 		int ovalX = (int) (Util.map(points[0].x, 0, 1, gridX, gridX + gridSize) - r*gridSize);
 		int ovalY = (int) (Util.map(points[0].y, 0, 1, gridY, gridY + gridSize) - r*gridSize);
 		g.setColor(Color.GREEN);
 		g.drawOval(ovalX, ovalY, (int) (r*2*gridSize), (int) (r*2*gridSize));
 	}
 	
-	void setXY(int x, int y) {
+	public void setXY(int x, int y) {
 		points[0].x = x;
 		points[0].y = y;
 	}
