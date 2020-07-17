@@ -14,21 +14,17 @@
  */
 
 import java.awt.BorderLayout;
-import java.awt.Canvas;
 import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.image.BufferStrategy;
 import java.io.IOException;
 
-import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -47,6 +43,7 @@ public class Main implements ComponentListener {
 
 	SaveManager saveManager;
 	Simulator simulator;
+	ComponentSelector selector = new ComponentSelector(8, 2);
 	
 	Dimension lastSize;
 	
@@ -117,14 +114,18 @@ public class Main implements ComponentListener {
 		simulator.setPreferredSize(new Dimension(width, height-toolbarHeight));
 		
 		panel = new JPanel();
-		toolbar = createToolbar(panel);
+		toolbar = createToolbar();
+		int selectorW = width/20;
+		selector.setPreferredSize(new Dimension(selectorW*2, selectorW*5));
 
 		toolbar.setPreferredSize(new Dimension(width, toolbarHeight));
-
-	    panel.setLayout(new BorderLayout());
-		panel.add(toolbar, BorderLayout.NORTH);
-		panel.add(simulator, BorderLayout.CENTER);
 		
+	    panel.setLayout(new BorderLayout());
+		//panel.add(toolbar, BorderLayout.NORTH);
+		panel.add(simulator, BorderLayout.CENTER);
+		panel.add(selector, BorderLayout.WEST);
+
+	    frame.setJMenuBar(toolbar);
 		frame.add(panel);
 		frame.setSize(width, height);
 		frame.setVisible(true);
@@ -136,7 +137,6 @@ public class Main implements ComponentListener {
 		    }
 		});
 		frame.pack();
-		toolbar.addMouseListener(toolbar);
 		System.out.println(toolbar.getHeight());
 		System.out.println(simulator.getHeight());
 	}
@@ -200,44 +200,37 @@ public class Main implements ComponentListener {
 		}
 	}
 	
-	Toolbar createToolbar(JPanel panel) {
-		Toolbar t = new Toolbar(panel);
+	Toolbar createToolbar() {
+		Toolbar t = new Toolbar();
 		
-		t.newListener = new ActionListener() {
+		t.nw.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				System.out.println("creating new simulator");
 				createNewSimulator();
 			}
-		};
+		});
 		
-		t.openFileListener = new ActionListener() {
+		t.open.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				openWorkspace();
 			}
-		};
+		});
 		
-		t.openLastListener = new ActionListener() {
+		t.openLast.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 			    System.out.println("Popup menu item ["
 			            + event.getActionCommand() + "] was pressed.");
 			}
-		};
+		});
 		
-		t.recentsListener = new ActionListener() {
+		t.recents.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 			    System.out.println("Popup menu item ["
 			            + event.getActionCommand() + "] was pressed.");
 			}
-		};
+		});
 		
-		t.closeListener = new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-			    System.out.println("Popup menu item ["
-			            + event.getActionCommand() + "] was pressed.");
-			}
-		};
-		
-		t.saveListener = new ActionListener() {
+		t.save.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 			    saveManager = new SaveManager(simulator.name);
 			    try {
@@ -246,9 +239,9 @@ public class Main implements ComponentListener {
 					e.printStackTrace();
 				}
 			}
-		};
+		});
 		
-		t.saveAsListener = new ActionListener() {
+		t.saveAs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				saveManager = new SaveManager();
 				try {
@@ -258,20 +251,41 @@ public class Main implements ComponentListener {
 					e.printStackTrace();
 				}
 			}
-		};
+		});
 		
-		t.printListener = new ActionListener() {
+		t.saveAll.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				saveManager = new SaveManager();
+				try {
+					saveManager.saveAs(frame, simulator);
+					System.out.println("simulator name after save: " + simulator.name);
+				} catch(IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		
+		t.print.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 			    simulator.print();
 			}
-		};
+		});
 		
-		t.settingsListener = new ActionListener() {
+		t.changeWorkspace.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+			}
+		});
+		
+		t.settings.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 			    SettingsWindow sw = new SettingsWindow();
 			    System.out.println("opening settings");
 			}
-		};
+		});
+		
+		t.license.addActionListener((event) -> {
+			new LegalWindow();
+		});
 		return t;
 	}
 	

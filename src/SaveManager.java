@@ -150,6 +150,11 @@ public class SaveManager {
 		stream.writeInt(c.getType());
 		stream.writeInt(c.x);
 		stream.writeInt(c.y);
+		if(c instanceof Rom) {
+			byte[] d = ((Rom) c).data;
+			stream.writeInt(d.length);
+			data.write(d);
+		}
 		byte[] result = data.toByteArray();
 		return result;
 	}
@@ -168,6 +173,7 @@ public class SaveManager {
 		DataInputStream in = new DataInputStream(bytesIn);
 		Simulator s = new Simulator();
 		short numWires = in.readShort();
+		
 		for(int i = 0; i < numWires; i++) {
 			Wire w = loadWire(in);
 			s.wires.add(w);
@@ -214,12 +220,21 @@ public class SaveManager {
 	Component loadComponent(DataInputStream in, int componentNum) throws IOException {
 
 		int type = in.readInt();
+		
 		Component c = Component.create(type, componentNum);
 		int x = in.readInt();
 		int y = in.readInt();
 		c.x = x;
 		c.y = y;
 		c.setPinLocations();
+		
+		if(c instanceof Rom) {
+			int size = in.readInt();
+			byte[] data = ((Rom) c).data;
+			for(int i = 0; i < size; i++) {
+				data[i] = in.readByte();
+			}
+		}
 		return c;
 	}
 

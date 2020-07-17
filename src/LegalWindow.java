@@ -694,6 +694,7 @@ public class LegalWindow extends JDialog {
 		add(scrollPane);
 		
 		pack();
+		setModal(true);
 		setVisible(true);
 	}
 }

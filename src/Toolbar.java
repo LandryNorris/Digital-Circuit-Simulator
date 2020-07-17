@@ -1,138 +1,82 @@
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
-import javax.swing.JComponent;
 import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 
-public class Toolbar extends JComponent implements MouseListener {
 
-	private static final long serialVersionUID = -3012892157986073114L;
-	int width, height;
-	int itemWidth;
+public class Toolbar extends JMenuBar {
+	private static final long serialVersionUID = 3818960967862962532L;
 
-	JPanel frame;
+	JMenuItem nw;
+	JMenuItem open;
+	JMenuItem openLast;
+	JMenuItem recents;
 
-	String[] options = { "File", "Edit", "View", "Simulator", "Window", "Help" };
+	public JMenuItem save;
 
-	JPopupMenu popup = new JPopupMenu();
+	public JMenuItem saveAs;
+
+	public JMenuItem saveAll;
+
+	public JMenuItem print;
+
+	public JMenuItem changeWorkspace;
+
+	public JMenuItem settings;
+
+	public JMenuItem license;
 	
-	ActionListener newListener;
-	ActionListener openFileListener;
-	ActionListener openLastListener;
-	ActionListener recentsListener;
-	ActionListener closeListener;
-	ActionListener saveListener;
-	ActionListener saveAsListener;
-	ActionListener printListener;
-	ActionListener settingsListener;
-
-	Toolbar(JPanel f) {
-		frame = f;
-	}
-
-	@Override
-	protected void paintComponent(Graphics graphics) {
-		Graphics2D g = (Graphics2D) graphics;
-		g.setColor(Color.WHITE);
-		g.fillRect(0, 0, getWidth(), getHeight());
-		g.setColor(Color.BLACK);
-		g.setFont(g.getFont().deriveFont(18f));
-		itemWidth = getWidth() / 12;
-		for(int i = 0; i < options.length; i++) {
-			g.drawString(options[i], itemWidth * i, getHeight() / 2 + g.getFontMetrics().getHeight() / 2 - g.getFontMetrics().getDescent());
-		}
-	}
-
-	void onClick(int clickX, int clickY) {
-		if(clickX <= options.length * itemWidth) {
-			int index = clickX / itemWidth;
-			System.out.println(index);
-			openPopupMenu(index);
-		}
-	}
-
-	void openPopupMenu(int index) {
-		popup = createMenu(index);
-		popup.show(frame, index * itemWidth, getHeight());
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mousePressed(MouseEvent e) {
-		onClick(e.getX(), e.getY());
-
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-
-	}
-
-	JPopupMenu createMenu(int option) {
+	Toolbar() {
+		JMenu file = new JMenu("File");
 		
-		JPopupMenu popup = new JPopupMenu();
-		switch(option) {
+		nw = createItem("New");
+		open = createItem("Open");
+		openLast = createItem("Open Last");
+		recents = createItem("Recents");
+		save = createItem("Save");
+		saveAs = createItem("Save As");
+		saveAll = createItem("Save All");
+		print = createItem("Print");
+		changeWorkspace = createItem("Change Workspace");
+		settings = createItem("Settings");
+		file.add(nw);
+		file.add(open);
+		file.add(openLast);
+		file.add(recents);
+		file.add(save);
+		file.add(saveAs);
+		file.add(saveAll);
+		file.add(print);
+		file.add(changeWorkspace);
+		file.add(settings);
 		
-			case 0: { //File
-				//"New", "Open File", "Open Last", "Sbmnu:Recents,test1,test2,test3,", "Close", "Save", "Save As",
-				//"Print", "Settings"
-				JMenuItem n = new JMenuItem("New");
-				JMenuItem openFile = new JMenuItem("Open File");
-				JMenuItem openLast = new JMenuItem("Open Last");
-				JMenu recents = new JMenu("Recents");
-				JMenuItem close = new JMenuItem("Close");
-				JMenuItem save = new JMenuItem("Save");
-				JMenuItem saveAs = new JMenuItem("Save As");
-				JMenuItem print = new JMenuItem("Print");
-				JMenuItem settings = new JMenuItem("Settings");
-				
-				n.addActionListener(newListener);
-				openFile.addActionListener(openFileListener);
-				openLast.addActionListener(openLastListener);
-				recents.addActionListener(recentsListener);
-				close.addActionListener(closeListener);
-				save.addActionListener(saveListener);
-				saveAs.addActionListener(saveAsListener);
-				print.addActionListener(printListener);
-				settings.addActionListener(settingsListener);
-				
-				popup.add(n);
-				popup.add(openFile);
-				popup.add(openLast);
-				popup.add(recents);
-				popup.add(close);
-				popup.add(save);
-				popup.add(saveAs);
-				popup.add(print);
-				popup.add(settings);
-			}
-		}
-		return popup;
+		JMenu edit = new JMenu("Edit");
+		JMenuItem delete = createItem("Delete");
+		
+		edit.add(delete);
+		
+		
+		JMenu view = new JMenu("View");
+		JMenu sim = new JMenu("Simulator");
+		JMenu window = new JMenu("Window");
+		
+		JMenu help = new JMenu("Help");
+		
+		license = createItem("License");
+		
+		help.add(license);
+		
+		add(file);
+		add(edit);
+		add(view);
+		add(sim);
+		add(window);
+		add(help);
 	}
 
+	JMenuItem createItem(String name) {
+		return new JMenuItem(name);
+	}
 }

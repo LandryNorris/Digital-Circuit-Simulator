@@ -30,10 +30,10 @@ public class SettingsWindow extends JDialog {
 	
 	SettingsWindow() {
 		setTitle(title);
+		setModal(true);
 		setLayout(new BorderLayout());
 		layoutSettings();
 		JPanel buttonPanel = new JPanel();
-		//buttonPanel.setMinimumSize(new Dimension(getWidth(), 0));
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
 		buttonPanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		btnExit = new JButton("Exit and save");

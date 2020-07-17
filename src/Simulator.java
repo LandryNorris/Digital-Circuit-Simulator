@@ -240,9 +240,7 @@ public class Simulator extends JComponent implements MouseListener, MouseMotionL
 		// right-click
 		else if (e.getButton() == MouseEvent.BUTTON3) {
 			for (Component component : components) {
-				if (component instanceof Input && component.clicked(mouseX, mouseY)) {
-					((Input) component).toggle();
-				}
+				component.rightClick();
 			}
 		}
 	}
@@ -349,6 +347,11 @@ public class Simulator extends JComponent implements MouseListener, MouseMotionL
 		else if (selectedComponentIndex == -1 && e.getKeyChar() == 't') {
 			selectedComponentIndex = components.size();
 			components.add(new TFlipFlop(selectedComponentIndex));
+		}
+		
+		else if (selectedComponentIndex == -1 && e.getKeyChar() == 'm') {
+			selectedComponentIndex = components.size();
+			components.add(new Rom8(selectedComponentIndex));
 		}
 		
 		else if(e.getKeyChar() == 'l') {
