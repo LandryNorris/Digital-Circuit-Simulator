@@ -20,6 +20,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -44,7 +46,7 @@ public class Main implements ComponentListener {
 
 	SaveManager saveManager;
 	Simulator simulator;
-	ComponentSelector selector = new ComponentSelector(8, 2);
+	ComponentSelector selector = new ComponentSelector(10, 2);
 	
 	Dimension lastSize;
 	
@@ -116,13 +118,20 @@ public class Main implements ComponentListener {
 		
 		panel = new JPanel();
 		toolbar = createToolbar();
-		int selectorW = width/20;
-		selector.setPreferredSize(new Dimension(selectorW*2, selectorW*5));
+		int selectorW = width/15;
+		selector.setPreferredSize(new Dimension(selectorW*2, height));
+		selector.setOnComponentSelectedListener(new ComponentSelector.OnComponentSelectedListener() {
+			@Override
+			public void onComponentSelected(int type) {
+				Component c = Component.create(type);
+				simulator.components.add(c);
+				simulator.selectedComponentIndex = simulator.components.size()-1;
+			}
+		});
 
 		toolbar.setPreferredSize(new Dimension(width, toolbarHeight));
 		
 	    panel.setLayout(new BorderLayout());
-		//panel.add(toolbar, BorderLayout.NORTH);
 		panel.add(simulator, BorderLayout.CENTER);
 		panel.add(selector, BorderLayout.WEST);
 

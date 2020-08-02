@@ -16,6 +16,7 @@ package com.landry.digitalcircuitsimulator;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 import javax.swing.JDialog;
@@ -99,11 +100,29 @@ public abstract class Component {
 			inputs[i] = pin;
 		}
 	}
+	
+	protected void initInputPins() {
+		for(int i = 0; i < inputs.length; i++) {
+			Pin pin = new Pin();
+			pin.pinNumber = i;
+			pin.isInput = true;
+			inputs[i] = pin;
+		}
+	}
 
 	protected void initOutputPins(int componentNumber) {
 		for (int i = 0; i < outputs.length; i++) {
 			Pin pin = new Pin();
 			pin.componentNumber = componentNumber;
+			pin.pinNumber = i;
+			pin.isInput = false;
+			outputs[i] = pin;
+		}
+	}
+	
+	protected void initOutputPins() {
+		for (int i = 0; i < outputs.length; i++) {
+			Pin pin = new Pin();
 			pin.pinNumber = i;
 			pin.isInput = false;
 			outputs[i] = pin;
@@ -116,7 +135,8 @@ public abstract class Component {
 	}
 	
 	protected void initPins() {
-		initPins(0);
+		initInputPins();
+		initOutputPins();
 	}
 
 	protected void initInputPins(int componentNumber, int r) {
@@ -225,4 +245,19 @@ public abstract class Component {
 	}
 
 	public void rightClick() {}
+	
+	public Component clone() {
+		Component result = null;
+		try {
+			result =  getClass().getDeclaredConstructor().newInstance();
+			result.x = x;
+			result.y = y;
+			
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return result;
+	}
 }

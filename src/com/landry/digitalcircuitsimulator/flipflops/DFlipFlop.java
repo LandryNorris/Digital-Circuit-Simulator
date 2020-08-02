@@ -19,8 +19,9 @@ public class DFlipFlop extends Component {
 	}
 
 	public DFlipFlop() {
-		inputs = new Pin[0];
-		outputs = new Pin[1];
+		inputs = new Pin[2];
+		outputs = new Pin[2];
+		initPins();
 	}
 
 	public DFlipFlop(int componentNumber) {
