@@ -119,7 +119,12 @@ public class Simulator extends JComponent implements MouseListener, MouseMotionL
 		for (int y = yOffset; y < getHeight(); y += gridSize) {
 			g.drawLine(0, y, getWidth(), y);
 		}
-
+		
+		//draw (0, 0) marker
+		g.setColor(Color.BLACK);
+		Coordinate c = Util.gridToAbsolute(new Coordinate(0, 0), gridX, gridY, gridSize);
+		g.drawOval(c.x - gridSize/2, c.y - gridSize/2, gridSize, gridSize);
+		
 		for (Component component : components) {
 			if (true || component.onScreen(gridX, gridY, getWidth() / gridSize, getHeight() / gridSize)) // placeholder for future functionality.
 				component.draw(g, gridX, gridY, gridSize);
@@ -128,8 +133,6 @@ public class Simulator extends JComponent implements MouseListener, MouseMotionL
 		for (Wire wire : wires) {
 			wire.draw(g, gridX, gridY, gridSize);
 		}
-		Coordinate c = Util.gridToAbsolute(new Coordinate(0, 0), gridX, gridY, gridSize);
-		g.drawOval(c.x, c.y, 5, 5);
 	}
 
 	void update() {
