@@ -3,3 +3,6 @@
 
 #ignore SaveFiles folder
 SaveFiles
+
+#ignore the strange inner folder
+DigitalCircuitSimultor

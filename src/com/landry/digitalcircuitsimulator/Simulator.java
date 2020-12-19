@@ -80,6 +80,8 @@ public class Simulator extends JComponent implements MouseListener, MouseMotionL
 	ArrayList<Wire> wires = new ArrayList<Wire>();
 
 	SaveManager saveManager;
+	
+	OScope oscope;
 
 	Simulator() {
 	}
@@ -260,6 +262,10 @@ public class Simulator extends JComponent implements MouseListener, MouseMotionL
 				component.rightClick();
 			}
 		}
+	}
+	
+	void startOScope(int channels, int size) {
+		oscope = new OScope(channels, size);
 	}
 
 	void print() {
