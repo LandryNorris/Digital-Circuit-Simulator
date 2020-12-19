@@ -4,5 +4,11 @@
 #ignore SaveFiles folder
 SaveFiles
 
+#ignore appSettings
+appSettings.properties
+
 #ignore the strange inner folder
 DigitalCircuitSimultor
+
+#ignore out folder
+out
