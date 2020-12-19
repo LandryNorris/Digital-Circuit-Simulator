@@ -259,7 +259,9 @@ public class Simulator extends JComponent implements MouseListener, MouseMotionL
 		// right-click
 		else if (e.getButton() == MouseEvent.BUTTON3) {
 			for (Component component : components) {
-				component.rightClick();
+				if(component.clicked(mouseX, mouseY)) {
+					component.rightClick();
+				}
 			}
 		}
 	}
